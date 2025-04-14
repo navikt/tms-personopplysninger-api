@@ -1,0 +1,54 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: tms-personopplysninger-api
+  namespace: min-side
+  labels:
+    team: min-side
+spec:
+  image: {{image}}
+  port: 8080
+  liveness:
+    path: /internal/isalive
+    initialDelay: 10
+  readiness:
+    path: /internal/isready
+    initialDelay: 10
+  prometheus:
+    enabled: true
+    path: /internal/metrics
+  replicas:
+    min: 2
+    max: 4
+  tokenx:
+    enabled: true
+  azure:
+    application:
+      enabled: true
+  idporten:
+    enabled: true
+    sidecar:
+      enabled: true
+  kafka:
+    pool: nav-dev
+  accessPolicy:
+    outbound:
+      external:
+        - host: kodeverk-api.nav.no
+        - host: norg2.dev-fss-pub.nais.io
+        - host: digdir-krr-proxy.intern.dev.nav.no
+        - host: pdl-mottak.dev-fss-pub.nais.io
+        - host: pdl-api.dev-fss-pub.nais.io
+        - host: institusjon-opphold-proxy-q2.dev-fss-pub.nais.io
+        - host: medlemskap-medl-api.dev-fss-pub.nais.io
+        - host: sokos-kontoregister-person.intern.dev.nav.no
+  envFrom:
+    - secret: personopplysninger-api-secret
+  secureLogs:
+    enabled: true
+  resources:
+    limits:
+      memory: 768Mi
+    requests:
+      cpu: 10m
+      memory: 256Mi
