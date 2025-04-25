@@ -18,15 +18,27 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import no.nav.tms.common.metrics.installTmsMicrometerMetrics
+import no.nav.tms.personopplysninger.api.personalia.PersonaliaService
+import no.nav.tms.personopplysninger.api.personalia.personalia
+import no.nav.tms.token.support.idporten.sidecar.IdPortenAuthenticator
+import no.nav.tms.token.support.idporten.sidecar.IdPortenTokenPrincipal
+import no.nav.tms.token.support.idporten.sidecar.idPorten
+import no.nav.tms.token.support.idporten.sidecar.user.IdportenUserFactory
 import no.nav.tms.token.support.tokenx.validation.LevelOfAssurance
+import no.nav.tms.token.support.tokenx.validation.TokenXPrincipal
 import no.nav.tms.token.support.tokenx.validation.tokenX
+import no.nav.tms.token.support.tokenx.validation.user.TokenXUserFactory
 
 fun Application.mainModule(
+    personaliaService: PersonaliaService,
     httpClient: HttpClient,
     authInstaller: Application.() -> Unit = {
         authentication {
-            tokenX {
+            idPorten {
                 setAsDefault = true
+            }
+            tokenX {
+                setAsDefault = false
                 levelOfAssurance = LevelOfAssurance.HIGH
             }
         }
@@ -56,6 +68,9 @@ fun Application.mainModule(
 
     routing {
         metaRoutes()
+        authenticate(IdPortenAuthenticator.name) {
+            personalia(personaliaService)
+        }
     }
 
     configureShutdownHook(httpClient)
@@ -84,3 +99,23 @@ fun ObjectMapper.jsonConfig(): ObjectMapper {
     disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
     return this
 }
+
+val ApplicationCall.user: UserPrincipal get() {
+
+    return principal<IdPortenTokenPrincipal>()?.let {
+
+        val idPortenUser = IdportenUserFactory.createIdportenUser(this)
+
+        UserPrincipal(idPortenUser.ident, idPortenUser.tokenString)
+    } ?: principal<TokenXPrincipal>()?.let {
+
+        val tokenXUser = TokenXUserFactory.createTokenXUser(this)
+
+        UserPrincipal(tokenXUser.ident, tokenXUser.tokenString)
+    }?: throw IllegalStateException("Fant ingen principal")
+}
+
+class UserPrincipal(
+    val ident: String,
+    val accessToken: String
+)

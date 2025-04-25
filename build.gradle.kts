@@ -28,6 +28,7 @@ repositories {
 }
 
 dependencies {
+    implementation(Caffeine.caffeine)
     implementation(GraphQL.kotlinClient)
     implementation(GraphQL.kotlinKtorClient)
     implementation(JacksonDatatype.datatypeJsr310)
@@ -47,8 +48,10 @@ dependencies {
     implementation(Ktor.Serialization.jackson)
     implementation(Logstash.logbackEncoder)
     implementation(Postgresql.postgresql)
+    implementation(TmsKtorTokenSupport.azureExchange)
     implementation(TmsKtorTokenSupport.tokenXValidation)
     implementation(TmsKtorTokenSupport.tokendingsExchange)
+    implementation(TmsKtorTokenSupport.idportenSidecar)
     implementation(TmsCommonLib.utils)
     implementation(TmsCommonLib.kubernetes)
     implementation(TmsCommonLib.observability)

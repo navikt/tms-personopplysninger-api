@@ -1,4 +1,4 @@
-package no.nav.tms.personopplysninger.api.personalia
+package no.nav.tms.personopplysninger.api.kodeverk
 
 data class AdresseKodeverk (
     val poststed: String? = null,

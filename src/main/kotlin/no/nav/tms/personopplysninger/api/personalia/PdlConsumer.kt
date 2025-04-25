@@ -12,6 +12,7 @@ import io.ktor.http.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.pdl.generated.dto.HentPersonQuery
+import no.nav.tms.personopplysninger.api.UserPrincipal
 import no.nav.tms.personopplysninger.api.common.HeaderHelper.addNavHeaders
 import no.nav.tms.personopplysninger.api.common.HeaderHelper.authorization
 import no.nav.tms.personopplysninger.api.common.TokenExchanger
@@ -21,7 +22,7 @@ import java.util.*
 
 class PdlConsumer(
     private val httpClient: HttpClient,
-    private val graphqlUrl: URL,
+    private val pdlUrl: String,
     private val behandlingsnummer: String,
     private val tokenExchanger: TokenExchanger
 ) {
@@ -29,10 +30,10 @@ class PdlConsumer(
     private val log = KotlinLogging.logger {}
     private val secureLog = KotlinLogging.logger("secureLog")
 
-    suspend fun hentPerson(user: TokenXUser): HentPersonQuery.Result {
+    suspend fun hentPerson(user: UserPrincipal): HentPersonQuery.Result {
         return HentPersonQuery.Variables(ident = user.ident)
             .let { HentPersonQuery(it) }
-            .let { executeQuery(it, user.tokenString) }
+            .let { executeQuery(it, user.accessToken) }
     }
 
     private suspend inline fun <reified T : Any> executeQuery(request: GraphQLClientRequest<T>, token: String): T {
@@ -56,7 +57,7 @@ class PdlConsumer(
             log.info { "Sender graphql-spørring med callId=$callId" }
 
             httpClient.post {
-                url("$graphqlUrl/graphql")
+                url("$pdlUrl/graphql")
                 method = HttpMethod.Post
 
                 addNavHeaders()

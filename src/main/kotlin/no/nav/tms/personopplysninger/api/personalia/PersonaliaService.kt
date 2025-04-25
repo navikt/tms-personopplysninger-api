@@ -1,23 +1,36 @@
 package no.nav.tms.personopplysninger.api.personalia;
 
-import no.nav.pdl.generated.dto.HentPersonQuery
 import no.nav.pdl.generated.dto.hentpersonquery.GeografiskTilknytning
+import no.nav.pdl.generated.dto.hentpersonquery.Statsborgerskap
+import no.nav.tms.personopplysninger.api.UserPrincipal
+import no.nav.tms.personopplysninger.api.kodeverk.AdresseKodeverk
+import no.nav.tms.personopplysninger.api.kodeverk.KodeverkConsumer
+import no.nav.tms.personopplysninger.api.kodeverk.PersonaliaKodeverk
+import no.nav.tms.personopplysninger.api.personalia.addresse.kommunenummer
+import no.nav.tms.personopplysninger.api.personalia.addresse.landkode
+import no.nav.tms.personopplysninger.api.personalia.addresse.postnummer
+import no.nav.tms.personopplysninger.api.personalia.norg2.Norg2Consumer
+import no.nav.tms.personopplysninger.api.personalia.norg2.dto.Norg2EnhetKontaktinfo
+import no.nav.pdl.generated.dto.hentpersonquery.Person as PdlPerson
 import no.nav.tms.token.support.tokenx.validation.user.TokenXUser
+import java.time.LocalDate
 
 class PersonaliaService(
-//    private val kodeverkConsumer: KodeverkConsumer,
-//    private val norg2Consumer: Norg2Consumer,
+    private val kodeverkConsumer: KodeverkConsumer,
+    private val norg2Consumer: Norg2Consumer,
     private val kontoregisterConsumer: KontoregisterConsumer,
     private val pdlConsumer: PdlConsumer
 ) {
+    suspend fun hentPersoninfo(user: UserPrincipal): PersonaliaOgAdresser {
+        return pdlConsumer.hentPerson(user).let { result ->
+            val person = requireNotNull(result.person)
 
-    suspend fun hentPersoninfo(user: TokenXUser): PersonaliaOgAdresser {
-        return pdlConsumer.hentPerson(user).let { person ->
             val konto = kontoregisterConsumer.hentAktivKonto(user)
-            person.toOutbound(
+            PersonaliaOgAdresser.mapResult(
+                person = person,
                 konto = konto,
                 kodeverk = createPersonaliaKodeverk(person, konto),
-                enhetKontaktInformasjon = enhetKontaktInfoFor(person.geografiskTilknytning, token)
+                enhetKontaktInformasjon = enhetKontaktInfoFor(result.geografiskTilknytning, user.accessToken)
             )
         }
     }
@@ -32,10 +45,10 @@ class PersonaliaService(
     }
 
     private suspend fun createPersonaliaKodeverk(
-        inboundPdl: HentPersonQuery.Result,
+        person: PdlPerson,
         inboundKonto: Konto?
     ): PersonaliaKodeverk {
-        return inboundPdl.person!!.run {
+        return with(person) {
             PersonaliaKodeverk(
                 foedekommuneterm = hentKommuneKodeverksTerm(foedested.firstOrNull()?.foedekommune),
                 foedelandterm = hentLandKodeverksTerm(foedested.firstOrNull()?.foedeland),
@@ -59,5 +72,52 @@ class PersonaliaService(
                     hentAdresseKodeverk(it.postnummer, it.landkode, it.kommunenummer)
                 })
         }
+    }
+
+    private suspend fun hentGyldigeStatsborgerskap(statsborgerskap: List<Statsborgerskap>): List<String> {
+        return statsborgerskap
+            .filter { it.land != UKJENT_LAND && it.isValid() } // Filtrer ut ukjent og ugyldige
+            .map { kodeverkConsumer.hentStatsborgerskap().term(it.land) }
+            .filter { it.isNotEmpty() }
+    }
+
+    private fun Statsborgerskap.isValid(): Boolean {
+        return this.gyldigTilOgMed.let { it == null || LocalDate.parse(it).isAfter(LocalDate.now()) }
+    }
+
+    private suspend fun hentAdresseKodeverk(
+        postnummer: String?,
+        landkode: String?,
+        kommunenummer: String?
+    ): AdresseKodeverk {
+        return AdresseKodeverk(
+            poststed = postnummer?.let { kodeverkConsumer.hentPostnummer().term(it) },
+            land = landkode?.let { kodeverkConsumer.hentLandKoder().term(it) },
+            kommune = hentKommuneKodeverksTerm(kommunenummer),
+        )
+    }
+
+    private suspend fun hentLandKodeverksTerm(inbound: String?): String? {
+        return inbound?.let { kodeverkConsumer.hentLandKoder().term(it) }
+    }
+
+    private suspend fun hentKommuneKodeverksTerm(inbound: String?): String? {
+        return if ("0000" == inbound) {
+            ""
+        } else {
+            inbound?.let { kodeverkConsumer.hentKommuner().term(it) }
+        }
+    }
+
+    private suspend fun hentValutaKontoregisterKodeterm(kode: String?): String? {
+        return kontoregisterConsumer.hentValutakoder().find { it.valutakode == kode }?.valuta
+    }
+
+    private suspend fun hentLandKontoregisterKodeterm(kode: String?): String? {
+        return kontoregisterConsumer.hentLandkoder().find { it.landkode == kode }?.land
+    }
+
+    companion object {
+        private const val UKJENT_LAND = "XUK"
     }
 }

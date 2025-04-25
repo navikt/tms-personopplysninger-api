@@ -7,27 +7,30 @@ import io.ktor.client.network.sockets.ConnectTimeoutException
 import io.ktor.client.network.sockets.SocketTimeoutException
 import io.ktor.client.plugins.HttpRequestTimeoutException
 import io.ktor.client.request.get
-import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.*
-import no.nav.tms.personopplysninger.api.common.HeaderHelper
+import no.nav.tms.personopplysninger.api.UserPrincipal
+import no.nav.tms.personopplysninger.api.common.SingletonCache
 import no.nav.tms.personopplysninger.api.common.HeaderHelper.addNavHeaders
 import no.nav.tms.personopplysninger.api.common.HeaderHelper.authorization
 import no.nav.tms.personopplysninger.api.common.TokenExchanger
 import no.nav.tms.token.support.tokenx.validation.user.TokenXUser
-import java.util.*
+import java.time.Duration
 
 class KontoregisterConsumer(
     private val client: HttpClient,
     private val kontoregisterUrl: String,
     private val tokenExchanger: TokenExchanger,
 ) {
-    private val logger = KotlinLogging.logger { }
+    private val log = KotlinLogging.logger { }
 
-    suspend fun hentAktivKonto(user: TokenXUser): Konto? {
-        val accessToken = tokenExchanger.kontoregisterToken(user.tokenString)
+    private val landkoder = SingletonCache<List<KontoResponse.Landkode>>(expireAfter = Duration.ofMinutes(45))
+    private val valutakoder = SingletonCache<List<KontoResponse.Valutakode>>(expireAfter = Duration.ofMinutes(45))
+
+    suspend fun hentAktivKonto(user: UserPrincipal): Konto? {
+        val accessToken = tokenExchanger.kontoregisterToken(user.accessToken)
         val request = HentAktivKonto(user.ident)
 
         try {
@@ -41,29 +44,33 @@ class KontoregisterConsumer(
             return if (response.status.isSuccess()) {
                 response.body()
             } else if (response.status == HttpStatusCode.NotFound) {
-                logger.info { "Kall mot kontoregister gav tomt svar. Returnerer null." }
+                log.info { "Kall mot kontoregister gav tomt svar. Returnerer null." }
                 null
             } else {
-                logger.warn { "Kall mot kontoregister feilet med status ${response.status}. Returnerer feilobjekt." }
+                log.warn { "Kall mot kontoregister feilet med status ${response.status}. Returnerer feilobjekt." }
                 Konto(error = true)
             }
         } catch (e: Exception) {
             when (e) {
                 is SocketTimeoutException,
                 is HttpRequestTimeoutException,
-                is ConnectTimeoutException -> logger.warn { "Kall mot kontoregister timet ut. Returnerer feilobjekt." }
+                is ConnectTimeoutException -> log.warn { "Kall mot kontoregister timet ut. Returnerer feilobjekt." }
 
-                else -> logger.warn { "Ukjent feil ved kall mot kontoregister. Returnerer feilobjekt." }
+                else -> log.warn { "Ukjent feil ved kall mot kontoregister. Returnerer feilobjekt." }
             }
             return Konto(error = true)
         }
     }
 
     suspend fun hentLandkoder(): List<KontoResponse.Landkode> {
-        return client.get("$kontoregisterUrl/api/system/v1/hent-landkoder").body()
+        return landkoder.get {
+            client.get("$kontoregisterUrl/api/system/v1/hent-landkoder").body()
+        }
     }
 
     suspend fun hentValutakoder(): List<KontoResponse.Valutakode> {
-        return client.get("$kontoregisterUrl/api/system/v1/hent-valutakoder").body()
+        return valutakoder.get {
+            client.get("$kontoregisterUrl/api/system/v1/hent-valutakoder").body()
+        }
     }
 }
