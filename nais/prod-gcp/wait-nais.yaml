@@ -9,14 +9,14 @@ spec:
   image: {{version}}
   port: 8080
   liveness:
-    path: /internal/isalive
+    path: /tms-personopplysninger-api/internal/isalive
     initialDelay: 10
   readiness:
-    path: /internal/isready
+    path: /tms-personopplysninger-api/internal/isready
     initialDelay: 10
   prometheus:
     enabled: true
-    path: /internal/metrics
+    path: /tms-personopplysninger-api/metrics
   replicas:
     min: 2
     max: 4
