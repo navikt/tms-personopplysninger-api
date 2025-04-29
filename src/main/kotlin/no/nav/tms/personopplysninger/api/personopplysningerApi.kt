@@ -68,7 +68,7 @@ fun Application.mainModule(
 
     routing {
         metaRoutes()
-        authenticate(IdPortenAuthenticator.name) {
+        authenticate {
             personalia(personaliaService)
         }
     }
@@ -76,7 +76,7 @@ fun Application.mainModule(
     configureShutdownHook(httpClient)
 }
 
-fun Route.metaRoutes() {
+private fun Route.metaRoutes() {
     get("/internal/isalive") {
         call.respondText(text = "ALIVE", contentType = ContentType.Text.Plain)
     }
