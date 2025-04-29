@@ -31,8 +31,6 @@ spec:
     enabled: true
     sidecar:
       enabled: true
-  kafka:
-    pool: nav-prod
   accessPolicy:
     outbound:
       external:
@@ -44,8 +42,6 @@ spec:
         - host: institusjon-opphold-proxy.prod-fss-pub.nais.io
         - host: medlemskap-medl-api.prod-fss-pub.nais.io
         - host: sokos-kontoregister-person.intern.nav.no
-  envFrom:
-    - secret: personopplysninger-api-secret
   secureLogs:
     enabled: true
   resources:
