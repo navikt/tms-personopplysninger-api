@@ -29,13 +29,13 @@ data class Environment(
     val medlUrl: String = System.getenv("MEDLEMSKAP_MEDL_API_URL"),
     val kontoregisterUrl: String = System.getenv("KONTOREGISTER_URL"),
 
-    val inst2ClientId: String = System.getenv("INST2_TARGET_APP"),
-    val digdirKrrProxyClientId: String = System.getenv("DIGDIR_KRR_PROXY_CONSUMER_TARGET_APP"),
-    val medlClientId: String = System.getenv("MEDL_TARGET_APP"),
-    val pdlClientId: String = System.getenv("PDL_CONSUMER_TARGET_APP"),
-    val pdlMottakClientId: String = System.getenv("PDL_MOTTAK_TARGET_APP"),
-    val kontoregisterClientId: String = System.getenv("KONTOREGISTER_TARGET_APP"),
-    val kodeverkClientId: String = System.getenv("KODEVERK_TARGET_APP"),
+    val inst2ClientId: String = System.getenv("INST2_CLIENT_ID"),
+    val digdirKrrProxyClientId: String = System.getenv("DIGDIR_KRR_PROXY_CONSUMER_CLIENT_ID"),
+    val medlClientId: String = System.getenv("MEDL_CLIENT_ID"),
+    val pdlClientId: String = System.getenv("PDL_CONSUMER_CLIENT_ID"),
+    val pdlMottakClientId: String = System.getenv("PDL_MOTTAK_CLIENT_ID"),
+    val kontoregisterClientId: String = System.getenv("KONTOREGISTER_CLIENT_ID"),
+    val kodeverkClientId: String = System.getenv("KODEVERK_CLIENT_ID"),
 
     val pdlBehandlingsnummer: String = "B258"
 )

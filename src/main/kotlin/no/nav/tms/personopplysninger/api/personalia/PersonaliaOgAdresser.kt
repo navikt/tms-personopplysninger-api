@@ -1,9 +1,8 @@
 package no.nav.tms.personopplysninger.api.personalia
 
-
 import no.nav.tms.personopplysninger.api.kodeverk.PersonaliaKodeverk
 import no.nav.tms.personopplysninger.api.personalia.addresse.Adresser
-import no.nav.tms.personopplysninger.api.personalia.norg2.dto.Norg2EnhetKontaktinfo
+import no.nav.tms.personopplysninger.api.personalia.norg2.Norg2EnhetKontaktinfo
 
 import no.nav.pdl.generated.dto.hentpersonquery.Person as PdlPerson
 

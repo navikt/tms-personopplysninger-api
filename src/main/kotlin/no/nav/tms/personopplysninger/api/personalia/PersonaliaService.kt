@@ -10,9 +10,8 @@ import no.nav.tms.personopplysninger.api.personalia.addresse.kommunenummer
 import no.nav.tms.personopplysninger.api.personalia.addresse.landkode
 import no.nav.tms.personopplysninger.api.personalia.addresse.postnummer
 import no.nav.tms.personopplysninger.api.personalia.norg2.Norg2Consumer
-import no.nav.tms.personopplysninger.api.personalia.norg2.dto.Norg2EnhetKontaktinfo
+import no.nav.tms.personopplysninger.api.personalia.norg2.Norg2EnhetKontaktinfo
 import no.nav.pdl.generated.dto.hentpersonquery.Person as PdlPerson
-import no.nav.tms.token.support.tokenx.validation.user.TokenXUser
 import java.time.LocalDate
 
 class PersonaliaService(
@@ -30,18 +29,17 @@ class PersonaliaService(
                 person = person,
                 konto = konto,
                 kodeverk = createPersonaliaKodeverk(person, konto),
-                enhetKontaktInformasjon = enhetKontaktInfoFor(result.geografiskTilknytning, user.accessToken)
+                enhetKontaktInformasjon = enhetKontaktInfoFor(result.geografiskTilknytning)
             )
         }
     }
 
     private suspend fun enhetKontaktInfoFor(
-        geografiskTilknytning: GeografiskTilknytning?,
-        token: String
+        geografiskTilknytning: GeografiskTilknytning?
     ): Norg2EnhetKontaktinfo? {
         return geografiskTilknytning.let { it?.gtBydel ?: it?.gtKommune }
-            ?.let { norg2Consumer.hentEnhet(token, it) }
-            ?.let { norg2Consumer.hentKontaktinfo(token, it.enhetNr) }
+            ?.let { norg2Consumer.hentEnhet(it) }
+            ?.let { norg2Consumer.hentKontaktinfo(it.enhetNr) }
     }
 
     private suspend fun createPersonaliaKodeverk(

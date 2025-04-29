@@ -21,7 +21,7 @@ spec:
     min: 2
     max: 4
   ingresses:
-    - "https://www.ansatt.dev.nav.no/tms-personopplysninger-api"
+    - "https://www.intern.nav.no/tms-personopplysninger-api"
   tokenx:
     enabled: true
   azure:
@@ -32,18 +32,18 @@ spec:
     sidecar:
       enabled: true
   kafka:
-    pool: nav-dev
+    pool: nav-prod
   accessPolicy:
     outbound:
       external:
         - host: kodeverk-api.nav.no
-        - host: norg2.dev-fss-pub.nais.io
-        - host: digdir-krr-proxy.intern.dev.nav.no
-        - host: pdl-mottak.dev-fss-pub.nais.io
-        - host: pdl-api.dev-fss-pub.nais.io
-        - host: institusjon-opphold-proxy-q2.dev-fss-pub.nais.io
-        - host: medlemskap-medl-api.dev-fss-pub.nais.io
-        - host: sokos-kontoregister-person.intern.dev.nav.no
+        - host: norg2.prod-fss-pub.nais.io
+        - host: digdir-krr-proxy.intern.nav.no
+        - host: pdl-mottak.prod-fss-pub.nais.io
+        - host: pdl-api.prod-fss-pub.nais.io
+        - host: institusjon-opphold-proxy.prod-fss-pub.nais.io
+        - host: medlemskap-medl-api.prod-fss-pub.nais.io
+        - host: sokos-kontoregister-person.intern.nav.no
   envFrom:
     - secret: personopplysninger-api-secret
   secureLogs:
@@ -52,36 +52,36 @@ spec:
     limits:
       memory: 768Mi
     requests:
-      cpu: 10m
+      cpu: 20m
       memory: 256Mi
   env:
     - name: DIGDIR_KRR_PROXY_CONSUMER_CLIENT_ID
-    - value: dev-gcp:team-rocket:digdir-krr-proxy
+    - value: prod-gcp:team-rocket:digdir-krr-proxy
     - name: DIGDIR_KRR_PROXY_URL
-    - value: https://digdir-krr-proxy.intern.dev.nav.no
+    - value: https://digdir-krr-proxy.intern.nav.no
     - name: INST2_API_URL
-    - value: https://inst2-q2.dev-fss-pub.nais.io/api
+    - value: https://inst2.prod-fss-pub.nais.io/api
     - name: INST2_CLIENT_ID
-    - value: dev-fss:team-rocket:inst2-q2
+    - value: prod-fss:team-rocket:inst2
     - name: KODEVERK_REST_API_URL
     - value: https://kodeverk-api.nav.no
     - name: KODEVERK_CLIENT_ID
-    - value: dev-gcp.team-rocket.kodeverk-api
+    - value: prod-gcp.team-rocket.kodeverk-api
     - name: KONTOREGISTER_CLIENT_ID
-    - value: dev-gcp:okonomi:sokos-kontoregister-person
+    - value: prod-gcp:okonomi:sokos-kontoregister-person
     - name: KONTOREGISTER_URL
-    - value: https://sokos-kontoregister-person.intern.dev.nav.no
+    - value: https://sokos-kontoregister-person.intern.nav.no
     - name: MEDL_CLIENT_ID
-    - value: dev-fss:team-rocket:medlemskap-medl-api
+    - value: prod-fss:team-rocket:medlemskap-medl-api
     - name: MEDLEMSKAP_MEDL_API_URL
-    - value: https://medlemskap-medl-api.dev-fss-pub.nais.io
+    - value: https://medlemskap-medl-api.prod-fss-pub.nais.io
     - name: NORG2_API_URL
-    - value: https://norg2.dev-fss-pub.nais.io/norg2
+    - value: https://norg2.prod-fss-pub.nais.io/norg2
     - name: PDL_API_URL
-    - value: https://pdl-api.dev-fss-pub.nais.io/graphql
+    - value: https://pdl-api.prod-fss-pub.nais.io/graphql
     - name: PDL_CONSUMER_CLIENT_ID
-    - value: dev-fss:pdl:pdl-api
+    - value: prod-fss:pdl:pdl-api
     - name: PDL_MOTTAK_API_URL
-    - value: https://pdl-mottak.dev-fss-pub.nais.io
+    - value: https://pdl-mottak.prod-fss-pub.nais.io
     - name: PDL_MOTTAK_CLIENT_ID
-    - value: dev-fss:pdl:pdl-mottak
+    - value: prod-fss:pdl:pdl-mottak

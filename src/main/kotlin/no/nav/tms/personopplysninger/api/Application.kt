@@ -41,6 +41,7 @@ fun main() {
             }
         },
         module = {
+            rootPath = "tms-personopplysninger-api"
             mainModule(personaliaService, httpClient)
         }
     ).start(wait = true)
