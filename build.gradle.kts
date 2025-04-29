@@ -68,7 +68,7 @@ dependencies {
 }
 
 application {
-    mainClass.set("no.nav.tms.personopplysninger.api")
+    mainClass.set("no.nav.tms.personopplysninger.api.AttplikationKt")
 }
 
 tasks {
