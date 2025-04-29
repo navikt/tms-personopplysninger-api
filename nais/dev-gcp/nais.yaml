@@ -74,7 +74,7 @@ spec:
     - name: NORG2_API_URL
       value: https://norg2.dev-fss-pub.nais.io/norg2
     - name: PDL_API_URL
-      value: https://pdl-api.dev-fss-pub.nais.io/graphql
+      value: https://pdl-api.dev-fss-pub.nais.io
     - name: PDL_CONSUMER_CLIENT_ID
       value: dev-fss:pdl:pdl-api
     - name: PDL_MOTTAK_API_URL
