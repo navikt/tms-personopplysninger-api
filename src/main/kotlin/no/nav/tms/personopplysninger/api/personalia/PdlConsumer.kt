@@ -1,7 +1,9 @@
 package no.nav.tms.personopplysninger.api.personalia
 
+import com.expediagroup.graphql.client.types.GraphQLClientError
 import com.expediagroup.graphql.client.types.GraphQLClientRequest
 import com.expediagroup.graphql.client.types.GraphQLClientResponse
+import com.expediagroup.graphql.client.types.GraphQLClientSourceLocation
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -76,8 +78,8 @@ class PdlConsumer(
             }
         }
 
-    private suspend inline fun <reified T: Any> parseBody(response: HttpResponse): GraphQLClientResponse<T> = try {
-        response.body<GraphQLClientResponse<T>>()
+    private suspend inline fun <reified T: Any> parseBody(response: HttpResponse): GraphQLResponse<T> = try {
+        response.body<GraphQLResponse<T>>()
             .also {
                 if (it.containsData() && it.containsErrors()) {
                     val baseMsg = "Resultatet inneholdt data og feil, dataene returneres til bruker."
@@ -88,10 +90,28 @@ class PdlConsumer(
                 }
             }
     } catch (e: Exception) {
-        throw RuntimeException("Klarte ikke tolke respons fra SAF", e)
+        throw RuntimeException("Klarte ikke tolke respons fra PFL", e)
     }
 
 
-    private fun GraphQLClientResponse<*>.containsData() = data != null
-    private fun GraphQLClientResponse<*>.containsErrors() = errors?.isNotEmpty() == true
+    private fun GraphQLResponse<*>.containsData() = data != null
+    private fun GraphQLResponse<*>.containsErrors() = errors?.isNotEmpty() == true
 }
+
+private data class GraphQLResponse<T>(
+    override val data: T? = null,
+    override val errors: List<GraphQLError>? = null,
+    override val extensions: Map<String, Any?>? = null
+): GraphQLClientResponse<T>
+
+private data class GraphQLError(
+    override val message: String,
+    override val locations: List<GraphQLSourceLocation>? = null,
+    override val extensions: Map<String, Any?>? = null,
+    override val path: List<Any>? = null
+): GraphQLClientError
+
+private data class GraphQLSourceLocation(
+    override val line: Int,
+    override val column: Int
+): GraphQLClientSourceLocation
