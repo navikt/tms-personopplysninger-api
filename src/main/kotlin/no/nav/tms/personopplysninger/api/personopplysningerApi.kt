@@ -18,7 +18,9 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import no.nav.tms.common.metrics.installTmsMicrometerMetrics
+import no.nav.tms.personopplysninger.api.kodeverk.KodeverkConsumerException
 import no.nav.tms.personopplysninger.api.personalia.PersonaliaService
+import no.nav.tms.personopplysninger.api.personalia.norg2.Norg2ConsumerException
 import no.nav.tms.personopplysninger.api.personalia.personalia
 import no.nav.tms.token.support.idporten.sidecar.IdPortenAuthenticator
 import no.nav.tms.token.support.idporten.sidecar.IdPortenTokenPrincipal
@@ -28,6 +30,7 @@ import no.nav.tms.token.support.tokenx.validation.LevelOfAssurance
 import no.nav.tms.token.support.tokenx.validation.TokenXPrincipal
 import no.nav.tms.token.support.tokenx.validation.tokenX
 import no.nav.tms.token.support.tokenx.validation.user.TokenXUserFactory
+import kotlin.math.log
 
 fun Application.mainModule(
     personaliaService: PersonaliaService,
@@ -44,7 +47,8 @@ fun Application.mainModule(
         }
     }
 ) {
-    val securelog = KotlinLogging.logger("secureLog")
+    val log = KotlinLogging.logger {}
+    val secureLog = KotlinLogging.logger("secureLog")
 
     install(DefaultHeaders)
 
@@ -52,7 +56,19 @@ fun Application.mainModule(
 
     install(StatusPages) {
         exception<Throwable> { call, cause ->
-            securelog.warn(cause) { "Kall til ${call.request.uri} feilet: ${cause.message}" }
+            when(cause) {
+                is KodeverkConsumerException -> {
+                    log.error { "Kall mot kodeverk [${cause.endpoint}] feiler med kode [${cause.status}]" }
+                    secureLog.error { "Kall mot kodeverk [${cause.endpoint}] feiler med kode [${cause.status}] og melding: $${cause.message}" }
+                }
+                is Norg2ConsumerException -> {
+                    log.error { "Kall mot norg2 [${cause.endpoint}] feiler med kode [${cause.status}]" }
+                    secureLog.error { "Kall mot norg2 [${cause.endpoint}] feiler med kode [${cause.status}] og melding: $${cause.message}" }
+                }
+                else -> {
+                    secureLog.warn(cause) { "Kall til ${call.request.uri} feilet: ${cause.message}" }
+                }
+            }
             call.respond(HttpStatusCode.InternalServerError)
         }
     }

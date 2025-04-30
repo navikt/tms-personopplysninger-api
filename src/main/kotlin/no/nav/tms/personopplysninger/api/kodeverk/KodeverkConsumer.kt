@@ -75,7 +75,7 @@ class KodeverkConsumer(
             return if (response.status.isSuccess()) {
                 response.body<KodeverkBetydningerResponse>()
             } else {
-                throw KodeverkConsumerException(response.request.url.toString(), response.status.value)
+                throw KodeverkConsumerException(response.request.url.toString(), response.status.value, response.bodyAsText())
             }
         }
     }
@@ -87,4 +87,4 @@ class KodeverkConsumer(
     }
 }
 
-class KodeverkConsumerException(val endpoint: String, val status: Int): RuntimeException()
+class KodeverkConsumerException(val endpoint: String, val status: Int, message: String): RuntimeException()
