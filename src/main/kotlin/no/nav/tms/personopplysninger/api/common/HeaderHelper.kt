@@ -5,7 +5,7 @@ import io.ktor.http.*
 import java.util.UUID
 
 object HeaderHelper {
-    private const val CALL_ID_HEADER_NAME = "Nav-Callid"
+    private const val CALL_ID_HEADER_NAME = "Nav-Call-Id"
     private const val NAV_CONSUMER_ID_HEADER_NAME = "Nav-Consumer-Id"
     private const val NAV_CONSUMER_ID = "tms-personopplysninger-api"
 
