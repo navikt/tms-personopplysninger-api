@@ -34,7 +34,7 @@ spec:
   accessPolicy:
     outbound:
       external:
-        - host: kodeverk-api.nav.no
+        - host: kodeverk-api.intern.dev.nav.no
         - host: norg2.dev-fss-pub.nais.io
         - host: digdir-krr-proxy.intern.dev.nav.no
         - host: pdl-mottak.dev-fss-pub.nais.io
@@ -60,7 +60,7 @@ spec:
     - name: INST2_CLIENT_ID
       value: dev-fss:team-rocket:inst2-q2
     - name: KODEVERK_REST_API_URL
-      value: https://kodeverk-api.nav.no
+      value: https://kodeverk-api.intern.dev.nav.no
     - name: KODEVERK_CLIENT_ID
       value: dev-gcp.team-rocket.kodeverk-api
     - name: KONTOREGISTER_CLIENT_ID

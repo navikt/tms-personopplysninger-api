@@ -59,11 +59,11 @@ fun Application.mainModule(
             when(cause) {
                 is KodeverkConsumerException -> {
                     log.error { "Kall mot kodeverk [${cause.endpoint}] feiler med kode [${cause.status}]" }
-                    secureLog.error { "Kall mot kodeverk [${cause.endpoint}] feiler med kode [${cause.status}] og melding: $${cause.message}" }
+                    secureLog.error { "Kall mot kodeverk [${cause.endpoint}] feiler med kode [${cause.status}] og melding: ${cause.message}" }
                 }
                 is Norg2ConsumerException -> {
                     log.error { "Kall mot norg2 [${cause.endpoint}] feiler med kode [${cause.status}]" }
-                    secureLog.error { "Kall mot norg2 [${cause.endpoint}] feiler med kode [${cause.status}] og melding: $${cause.message}" }
+                    secureLog.error { "Kall mot norg2 [${cause.endpoint}] feiler med kode [${cause.status}] og melding: ${cause.message}" }
                 }
                 else -> {
                     secureLog.warn(cause) { "Kall til ${call.request.uri} feilet: ${cause.message}" }
