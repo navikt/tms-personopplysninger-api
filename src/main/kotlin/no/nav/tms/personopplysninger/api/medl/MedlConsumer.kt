@@ -4,7 +4,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
-import io.ktor.http.isSuccess
+import io.ktor.http.*
 import no.nav.tms.personopplysninger.api.UserPrincipal
 import no.nav.tms.personopplysninger.api.common.HeaderHelper.addNavHeaders
 import no.nav.tms.personopplysninger.api.common.HeaderHelper.authorization
@@ -19,6 +19,7 @@ class MedlConsumer(
         val response =
             client.post {
                 url("$medlUrl/rest/v1/innsyn")
+                contentType(ContentType.Application.Json)
                 setBody(MedlRequest(personident = user.ident))
                 authorization(tokenExchanger.medlToken(user.accessToken))
                 addNavHeaders()
