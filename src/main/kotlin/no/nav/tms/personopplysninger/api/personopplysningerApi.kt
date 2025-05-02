@@ -19,10 +19,11 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import no.nav.tms.common.metrics.installTmsMicrometerMetrics
 import no.nav.tms.personopplysninger.api.kodeverk.KodeverkConsumerException
+import no.nav.tms.personopplysninger.api.medl.MedlService
+import no.nav.tms.personopplysninger.api.medl.medl
 import no.nav.tms.personopplysninger.api.personalia.PersonaliaService
 import no.nav.tms.personopplysninger.api.personalia.norg2.Norg2ConsumerException
 import no.nav.tms.personopplysninger.api.personalia.personalia
-import no.nav.tms.token.support.idporten.sidecar.IdPortenAuthenticator
 import no.nav.tms.token.support.idporten.sidecar.IdPortenTokenPrincipal
 import no.nav.tms.token.support.idporten.sidecar.idPorten
 import no.nav.tms.token.support.idporten.sidecar.user.IdportenUserFactory
@@ -34,6 +35,7 @@ import kotlin.math.log
 
 fun Application.mainModule(
     personaliaService: PersonaliaService,
+    medlService: MedlService,
     httpClient: HttpClient,
     authInstaller: Application.() -> Unit = {
         authentication {
@@ -86,6 +88,7 @@ fun Application.mainModule(
         metaRoutes()
         authenticate {
             personalia(personaliaService)
+            medl(medlService)
         }
     }
 

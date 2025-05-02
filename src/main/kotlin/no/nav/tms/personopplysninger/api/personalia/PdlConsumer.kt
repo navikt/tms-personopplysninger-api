@@ -60,7 +60,6 @@ class PdlConsumer(
 
             httpClient.post {
                 url("$pdlUrl/graphql")
-                method = HttpMethod.Post
 
                 addNavHeaders()
                 authorization(accessToken)

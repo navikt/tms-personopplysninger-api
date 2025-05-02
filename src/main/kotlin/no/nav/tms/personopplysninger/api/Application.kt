@@ -5,6 +5,8 @@ import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import no.nav.tms.personopplysninger.api.common.TokenExchanger
 import no.nav.tms.personopplysninger.api.kodeverk.KodeverkConsumer
+import no.nav.tms.personopplysninger.api.medl.MedlConsumer
+import no.nav.tms.personopplysninger.api.medl.MedlService
 import no.nav.tms.personopplysninger.api.personalia.KontoregisterConsumer
 import no.nav.tms.personopplysninger.api.personalia.PdlConsumer
 import no.nav.tms.personopplysninger.api.personalia.PersonaliaService
@@ -23,14 +25,22 @@ fun main() {
     val tokenExchanger = TokenExchanger(
         tokendingsService = TokendingsServiceBuilder.buildTokendingsService(),
         kontoregisterClientId = environment.kontoregisterClientId,
-        pdlClientId = environment.pdlClientId
+        pdlClientId = environment.pdlClientId,
+        medlClientId = environment.medlClientId
     )
 
+    val kodeverkConsumer = KodeverkConsumer(httpClient, azureService, environment.kodeverkUrl, environment.kodeverkClientId)
+
     val personaliaService = PersonaliaService(
-        kodeverkConsumer = KodeverkConsumer(httpClient, azureService, environment.kodeverkUrl, environment.kodeverkClientId),
+        kodeverkConsumer = kodeverkConsumer,
         norg2Consumer = Norg2Consumer(httpClient, environment.norg2Url),
         kontoregisterConsumer = KontoregisterConsumer(httpClient, environment.kontoregisterUrl, tokenExchanger),
         pdlConsumer = PdlConsumer(httpClient, environment.pdlUrl, environment.pdlBehandlingsnummer, tokenExchanger),
+    )
+
+    val medlService = MedlService(
+        medlConsumer = MedlConsumer(httpClient, environment.medlUrl, tokenExchanger),
+        kodeverkConsumer = kodeverkConsumer
     )
 
     embeddedServer(
@@ -42,7 +52,7 @@ fun main() {
         },
         module = {
             rootPath = "tms-personopplysninger-api"
-            mainModule(personaliaService, httpClient)
+            mainModule(personaliaService, medlService, httpClient)
         }
     ).start(wait = true)
 }
