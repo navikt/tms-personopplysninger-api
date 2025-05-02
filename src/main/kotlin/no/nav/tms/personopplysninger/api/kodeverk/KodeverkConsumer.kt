@@ -25,8 +25,6 @@ class KodeverkConsumer(
         .expireAfterWrite(Duration.ofMinutes(45))
         .build<Pair<String, Boolean>, KodeverkBetydningerResponse>()
 
-    val securelog = KotlinLogging.logger("secureLog")
-
     suspend fun hentRetningsnumre(): KodeverkBetydningerResponse {
         return getKodeverk("Retningsnumre")
     }
@@ -78,11 +76,7 @@ class KodeverkConsumer(
             return if (response.status.isSuccess()) {
                 response.body<KodeverkBetydningerResponse>()
             } else {
-                val token = azureService.getAccessToken(kodevekClientId)
-                val data = response.bodyAsBytes()
-                securelog.warn { "DEBUG: ${response.request}, $response, $data" }
-                securelog.info { "debug: $token" }
-                throw KodeverkConsumerException(response.request.url.toString(), response.status.value, "")
+                throw KodeverkConsumerException(response.request.url.toString(), response.status.value, response.bodyAsText())
             }
         }
     }
