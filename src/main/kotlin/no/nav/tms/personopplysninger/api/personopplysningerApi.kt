@@ -19,6 +19,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import no.nav.tms.common.metrics.installTmsMicrometerMetrics
 import no.nav.tms.personopplysninger.api.kodeverk.KodeverkConsumerException
+import no.nav.tms.personopplysninger.api.medl.MedlConsumerException
 import no.nav.tms.personopplysninger.api.medl.MedlService
 import no.nav.tms.personopplysninger.api.medl.medl
 import no.nav.tms.personopplysninger.api.personalia.PersonaliaService
@@ -66,6 +67,10 @@ fun Application.mainModule(
                 is Norg2ConsumerException -> {
                     log.error { "Kall mot norg2 [${cause.endpoint}] feiler med kode [${cause.status}]" }
                     secureLog.error { "Kall mot norg2 [${cause.endpoint}] feiler med kode [${cause.status}] og melding: ${cause.message}" }
+                }
+                is MedlConsumerException -> {
+                    log.error { "Kall mot medl-api [${cause.endpoint}] feiler med kode [${cause.status}]" }
+                    secureLog.error { "Kall mot medl-api [${cause.endpoint}] feiler med kode [${cause.status}] og melding: ${cause.message}" }
                 }
                 else -> {
                     secureLog.warn(cause) { "Kall til ${call.request.uri} feilet: ${cause.message}" }
