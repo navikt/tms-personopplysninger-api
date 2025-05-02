@@ -18,6 +18,8 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import no.nav.tms.common.metrics.installTmsMicrometerMetrics
+import no.nav.tms.personopplysninger.api.institusjon.InstitusjonConsumer
+import no.nav.tms.personopplysninger.api.institusjon.institusjon
 import no.nav.tms.personopplysninger.api.kodeverk.KodeverkConsumerException
 import no.nav.tms.personopplysninger.api.medl.MedlConsumerException
 import no.nav.tms.personopplysninger.api.medl.MedlService
@@ -37,6 +39,7 @@ import kotlin.math.log
 fun Application.mainModule(
     personaliaService: PersonaliaService,
     medlService: MedlService,
+    institusjonConsumer: InstitusjonConsumer,
     httpClient: HttpClient,
     authInstaller: Application.() -> Unit = {
         authentication {
@@ -94,6 +97,7 @@ fun Application.mainModule(
         authenticate {
             personalia(personaliaService)
             medl(medlService)
+            institusjon(institusjonConsumer)
         }
     }
 

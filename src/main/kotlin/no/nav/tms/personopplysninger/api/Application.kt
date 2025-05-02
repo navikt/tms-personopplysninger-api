@@ -4,6 +4,7 @@ import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import no.nav.tms.personopplysninger.api.common.TokenExchanger
+import no.nav.tms.personopplysninger.api.institusjon.InstitusjonConsumer
 import no.nav.tms.personopplysninger.api.kodeverk.KodeverkConsumer
 import no.nav.tms.personopplysninger.api.medl.MedlConsumer
 import no.nav.tms.personopplysninger.api.medl.MedlService
@@ -26,7 +27,8 @@ fun main() {
         tokendingsService = TokendingsServiceBuilder.buildTokendingsService(),
         kontoregisterClientId = environment.kontoregisterClientId,
         pdlClientId = environment.pdlClientId,
-        medlClientId = environment.medlClientId
+        medlClientId = environment.medlClientId,
+        inst2ClientId = environment.inst2ClientId
     )
 
     val kodeverkConsumer = KodeverkConsumer(httpClient, azureService, environment.kodeverkUrl, environment.kodeverkClientId)
@@ -43,6 +45,12 @@ fun main() {
         kodeverkConsumer = kodeverkConsumer
     )
 
+    val institusjonConsumer = InstitusjonConsumer(
+        client = httpClient,
+        inst2Url = environment.inst2Url,
+        tokenExchanger = tokenExchanger,
+    )
+
     embeddedServer(
         factory = Netty,
         configure = {
@@ -52,7 +60,7 @@ fun main() {
         },
         module = {
             rootPath = "tms-personopplysninger-api"
-            mainModule(personaliaService, medlService, httpClient)
+            mainModule(personaliaService, medlService, institusjonConsumer, httpClient)
         }
     ).start(wait = true)
 }
