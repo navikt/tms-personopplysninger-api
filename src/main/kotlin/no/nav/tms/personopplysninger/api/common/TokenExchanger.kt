@@ -27,6 +27,6 @@ class TokenExchanger(
     }
 
     suspend fun krrProxyToken(accessToken: String): String {
-        return tokendingsService.exchangeToken(accessToken, inst2ClientId)
+        return tokendingsService.exchangeToken(accessToken, krrProxyClientId)
     }
 }
