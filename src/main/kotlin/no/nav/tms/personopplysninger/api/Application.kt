@@ -3,19 +3,24 @@ package no.nav.tms.personopplysninger.api
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import io.ktor.server.routing.*
 import no.nav.tms.personopplysninger.api.common.TokenExchanger
 import no.nav.tms.personopplysninger.api.institusjon.InstitusjonConsumer
+import no.nav.tms.personopplysninger.api.institusjon.institusjon
 import no.nav.tms.personopplysninger.api.kodeverk.KodeverkConsumer
+import no.nav.tms.personopplysninger.api.kontaktinformasjon.KontaktinfoConsumer
+import no.nav.tms.personopplysninger.api.kontaktinformasjon.KontaktinformasjonService
+import no.nav.tms.personopplysninger.api.kontaktinformasjon.kontaktinformasjon
 import no.nav.tms.personopplysninger.api.medl.MedlConsumer
 import no.nav.tms.personopplysninger.api.medl.MedlService
+import no.nav.tms.personopplysninger.api.medl.medl
 import no.nav.tms.personopplysninger.api.personalia.KontoregisterConsumer
 import no.nav.tms.personopplysninger.api.personalia.PdlConsumer
 import no.nav.tms.personopplysninger.api.personalia.PersonaliaService
 import no.nav.tms.personopplysninger.api.personalia.norg2.Norg2Consumer
-import no.nav.tms.token.support.azure.exchange.AzureService
+import no.nav.tms.personopplysninger.api.personalia.personalia
 import no.nav.tms.token.support.azure.exchange.AzureServiceBuilder
 import no.nav.tms.token.support.tokendings.exchange.TokendingsServiceBuilder
-import kotlin.math.hypot
 
 fun main() {
     val environment = Environment()
@@ -28,7 +33,8 @@ fun main() {
         kontoregisterClientId = environment.kontoregisterClientId,
         pdlClientId = environment.pdlClientId,
         medlClientId = environment.medlClientId,
-        inst2ClientId = environment.inst2ClientId
+        inst2ClientId = environment.inst2ClientId,
+        krrProxyClientId = environment.digdirKrrProxyClientId
     )
 
     val kodeverkConsumer = KodeverkConsumer(httpClient, azureService, environment.kodeverkUrl, environment.kodeverkClientId)
@@ -51,6 +57,18 @@ fun main() {
         tokenExchanger = tokenExchanger,
     )
 
+    val kontaktinformasjonService = KontaktinformasjonService(
+        kontaktinfoConsumer = KontaktinfoConsumer(httpClient, environment.digdirKrrProxyUrl, tokenExchanger),
+        kodeverkConsumer = kodeverkConsumer
+    )
+
+    val userRoutes: Route.() -> Unit = {
+        personalia(personaliaService)
+        medl(medlService)
+        institusjon(institusjonConsumer)
+        kontaktinformasjon(kontaktinformasjonService)
+    }
+
     embeddedServer(
         factory = Netty,
         configure = {
@@ -60,7 +78,7 @@ fun main() {
         },
         module = {
             rootPath = "tms-personopplysninger-api"
-            mainModule(personaliaService, medlService, institusjonConsumer, httpClient)
+            mainModule(userRoutes, httpClient)
         }
     ).start(wait = true)
 }

@@ -37,9 +37,7 @@ import no.nav.tms.token.support.tokenx.validation.user.TokenXUserFactory
 import kotlin.math.log
 
 fun Application.mainModule(
-    personaliaService: PersonaliaService,
-    medlService: MedlService,
-    institusjonConsumer: InstitusjonConsumer,
+    userRoutes: Route.() -> Unit,
     httpClient: HttpClient,
     authInstaller: Application.() -> Unit = {
         authentication {
@@ -95,9 +93,7 @@ fun Application.mainModule(
     routing {
         metaRoutes()
         authenticate {
-            personalia(personaliaService)
-            medl(medlService)
-            institusjon(institusjonConsumer)
+            userRoutes()
         }
     }
 
