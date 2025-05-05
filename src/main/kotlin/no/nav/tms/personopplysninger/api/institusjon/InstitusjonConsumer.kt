@@ -6,6 +6,7 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import no.nav.tms.personopplysninger.api.UserPrincipal
+import no.nav.tms.personopplysninger.api.common.ConsumerException
 import no.nav.tms.personopplysninger.api.common.HeaderHelper.authorization
 import no.nav.tms.personopplysninger.api.common.TokenExchanger
 import no.nav.tms.personopplysninger.api.common.HeaderHelper.addNavHeaders
@@ -28,7 +29,7 @@ class InstitusjonConsumer(
         return if (response.status.isSuccess()) {
             response.body()
         } else {
-            throw InstitusjonConsumerException(response.request.url.toString(), response.status.value, response.bodyAsText())
+            throw ConsumerException.fromResponse(externalService = "inst-2", response)
         }
     }
 }

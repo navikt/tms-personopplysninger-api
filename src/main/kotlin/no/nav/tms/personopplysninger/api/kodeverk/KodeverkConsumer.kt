@@ -1,7 +1,6 @@
 package no.nav.tms.personopplysninger.api.kodeverk
 
 import com.github.benmanes.caffeine.cache.Caffeine
-import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.*
@@ -9,6 +8,7 @@ import io.ktor.client.statement.*
 import io.ktor.http.isSuccess
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import no.nav.tms.personopplysninger.api.common.ConsumerException
 import no.nav.tms.personopplysninger.api.common.HeaderHelper.addNavHeaders
 import no.nav.tms.personopplysninger.api.common.HeaderHelper.authorization
 import no.nav.tms.token.support.azure.exchange.AzureService
@@ -76,7 +76,7 @@ class KodeverkConsumer(
             return if (response.status.isSuccess()) {
                 response.body<KodeverkBetydningerResponse>()
             } else {
-                throw KodeverkConsumerException(response.request.url.toString(), response.status.value, response.bodyAsText())
+                throw ConsumerException.fromResponse(externalService = "kodeverk-api", response)
             }
         }
     }
@@ -87,5 +87,3 @@ class KodeverkConsumer(
         private const val NORSK_BOKMAAL = "nb"
     }
 }
-
-class KodeverkConsumerException(val endpoint: String, val status: Int, message: String): RuntimeException()

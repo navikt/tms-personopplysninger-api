@@ -7,6 +7,7 @@ import io.ktor.client.request.header
 import io.ktor.client.statement.*
 import io.ktor.http.isSuccess
 import no.nav.tms.personopplysninger.api.UserPrincipal
+import no.nav.tms.personopplysninger.api.common.ConsumerException
 import no.nav.tms.personopplysninger.api.common.HeaderHelper.addNavHeaders
 import no.nav.tms.personopplysninger.api.common.HeaderHelper.authorization
 import no.nav.tms.personopplysninger.api.common.TokenExchanger
@@ -27,9 +28,7 @@ class KontaktinfoConsumer(
         return if (response.status.isSuccess()) {
             response.body()
         } else {
-            throw KontaktinfoConsumerException(response.request.url.toString(), response.status.value, response.bodyAsText())
+            throw ConsumerException.fromResponse(externalService = "krr-proxy", response)
         }
     }
 }
-
-class KontaktinfoConsumerException(val endpoint: String, val status: Int, message: String): RuntimeException()
