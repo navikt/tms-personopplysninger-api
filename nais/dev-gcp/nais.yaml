@@ -21,7 +21,6 @@ spec:
     min: 2
     max: 4
   ingresses:
-    - "https://www.intern.dev.nav.no/tms-personopplysninger-api"
     - "https://www.ansatt.dev.nav.no/tms-personopplysninger-api"
   tokenx:
     enabled: true

@@ -24,12 +24,6 @@ class OppdaterPersonaliaService(
             .let { findOpplysningsId(it, telefonnummer.landskode, telefonnummer.nummer)}
             .let { pdlMottakConsumer.slettTelefonnummer(user, it) }
     }
-
-    suspend fun slettKontaktadresse(user: UserPrincipal): Endring {
-        return pdlApiConsumer.hentKontaktadresse(user)
-            .let { findOpplysningsId(it)}
-            .let { pdlMottakConsumer.slettKontaktadresse(user, it) }
-    }
 }
 
 private fun findOpplysningsId(result: HentTelefonQuery.Result, landskode: String, telefonnummer: String): String {
@@ -38,12 +32,4 @@ private fun findOpplysningsId(result: HentTelefonQuery.Result, landskode: String
         ?.metadata
         ?.opplysningsId
         ?: throw RuntimeException("Fant ikke opplysningsId for telefonnummer")
-}
-
-private fun findOpplysningsId(result: HentKontaktadresseQuery.Result): String {
-    return result.person?.kontaktadresse
-        ?.firstOrNull { it.metadata.master.lowercase() == "pdl" }
-        ?.metadata
-        ?.opplysningsId
-        ?: throw RuntimeException("Fant ikke opplysningsId for kontaktadresse")
 }

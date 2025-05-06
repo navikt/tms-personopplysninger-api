@@ -14,9 +14,8 @@ import no.nav.tms.personopplysninger.api.common.HeaderHelper.authorization
 import no.nav.tms.personopplysninger.api.common.TokenExchanger
 import no.nav.tms.personopplysninger.api.personalia.Endring
 import no.nav.tms.personopplysninger.api.personalia.TelefonnummerEndring
-import no.nav.tms.personopplysninger.api.personalia.pdl.EndrePersonopplysning.Companion.endreTelefonnummerPayload
-import no.nav.tms.personopplysninger.api.personalia.pdl.EndrePersonopplysning.Companion.slettKontaktadressePayload
-import no.nav.tms.personopplysninger.api.personalia.pdl.EndrePersonopplysning.Companion.slettTelefonnummerPayload
+import no.nav.tms.personopplysninger.api.personalia.pdl.OppdaterTelefonnummer.Companion.endreTelefonnummerPayload
+import no.nav.tms.personopplysninger.api.personalia.pdl.OppdaterTelefonnummer.Companion.slettTelefonnummerPayload
 
 class PdlMottakConsumer(
     private val client: HttpClient,
@@ -35,12 +34,7 @@ class PdlMottakConsumer(
         return sendPdlEndring(user, payload)
     }
 
-    suspend fun slettKontaktadresse(user: UserPrincipal, opplysningsId: String): Endring {
-        val payload = slettKontaktadressePayload(user.ident, opplysningsId)
-        return sendPdlEndring(user, payload)
-    }
-
-    private suspend fun sendPdlEndring(user: UserPrincipal, payload: EndrePersonopplysning): Endring {
+    private suspend fun sendPdlEndring(user: UserPrincipal, payload: OppdaterTelefonnummer): Endring {
         val exchangedToken = tokenExchanger.pdlMottakToken(user.accessToken)
 
         val response =
@@ -115,6 +109,6 @@ class PdlMottakConsumer(
     }
 }
 
-private data class PersonEndring(val personopplysninger: List<EndrePersonopplysning>) {
-    constructor(personopplysning: EndrePersonopplysning) : this(listOf(personopplysning))
+private data class PersonEndring(val personopplysninger: List<OppdaterTelefonnummer>) {
+    constructor(personopplysning: OppdaterTelefonnummer) : this(listOf(personopplysning))
 }
