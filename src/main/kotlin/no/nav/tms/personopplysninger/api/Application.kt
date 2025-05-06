@@ -14,10 +14,12 @@ import no.nav.tms.personopplysninger.api.kontaktinformasjon.kontaktinformasjon
 import no.nav.tms.personopplysninger.api.medl.MedlConsumer
 import no.nav.tms.personopplysninger.api.medl.MedlService
 import no.nav.tms.personopplysninger.api.medl.medl
-import no.nav.tms.personopplysninger.api.personalia.KontoregisterConsumer
-import no.nav.tms.personopplysninger.api.personalia.PdlConsumer
-import no.nav.tms.personopplysninger.api.personalia.PersonaliaService
+import no.nav.tms.personopplysninger.api.kontoregister.KontoregisterConsumer
+import no.nav.tms.personopplysninger.api.personalia.pdl.PdlApiConsumer
+import no.nav.tms.personopplysninger.api.personalia.HentPersonaliaService
+import no.nav.tms.personopplysninger.api.personalia.OppdaterPersonaliaService
 import no.nav.tms.personopplysninger.api.personalia.norg2.Norg2Consumer
+import no.nav.tms.personopplysninger.api.personalia.pdl.PdlMottakConsumer
 import no.nav.tms.personopplysninger.api.personalia.personalia
 import no.nav.tms.token.support.azure.exchange.AzureServiceBuilder
 import no.nav.tms.token.support.tokendings.exchange.TokendingsServiceBuilder
@@ -31,7 +33,8 @@ fun main() {
     val tokenExchanger = TokenExchanger(
         tokendingsService = TokendingsServiceBuilder.buildTokendingsService(),
         kontoregisterClientId = environment.kontoregisterClientId,
-        pdlClientId = environment.pdlClientId,
+        pdlApiClientId = environment.pdlApiClientId,
+        pdlMottakClientId = environment.pdlMottakClientId,
         medlClientId = environment.medlClientId,
         inst2ClientId = environment.inst2ClientId,
         krrProxyClientId = environment.digdirKrrProxyClientId
@@ -39,11 +42,19 @@ fun main() {
 
     val kodeverkConsumer = KodeverkConsumer(httpClient, azureService, environment.kodeverkUrl, environment.kodeverkClientId)
 
-    val personaliaService = PersonaliaService(
+    val pdlApiConsumer = PdlApiConsumer(httpClient, environment.pdlUrl, environment.pdlBehandlingsnummer, tokenExchanger)
+    val pdlMottakConsumer = PdlMottakConsumer(httpClient, environment.pdlMottakUrl, tokenExchanger)
+
+    val hentPersonaliaService = HentPersonaliaService(
         kodeverkConsumer = kodeverkConsumer,
         norg2Consumer = Norg2Consumer(httpClient, environment.norg2Url),
         kontoregisterConsumer = KontoregisterConsumer(httpClient, environment.kontoregisterUrl, tokenExchanger),
-        pdlConsumer = PdlConsumer(httpClient, environment.pdlUrl, environment.pdlBehandlingsnummer, tokenExchanger),
+        pdlApiConsumer = pdlApiConsumer,
+    )
+
+    val oppdaterPersonaliaService = OppdaterPersonaliaService(
+        pdlApiConsumer = pdlApiConsumer,
+        pdlMottakConsumer = pdlMottakConsumer
     )
 
     val medlService = MedlService(
@@ -63,7 +74,7 @@ fun main() {
     )
 
     val userRoutes: Route.() -> Unit = {
-        personalia(personaliaService)
+        personalia(hentPersonaliaService, oppdaterPersonaliaService)
         medl(medlService)
         institusjon(institusjonConsumer)
         kontaktinformasjon(kontaktinformasjonService)

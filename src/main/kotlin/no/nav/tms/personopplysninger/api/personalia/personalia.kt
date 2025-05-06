@@ -6,6 +6,38 @@ import no.nav.pdl.generated.dto.hentpersonquery.Navn
 import no.nav.pdl.generated.dto.hentpersonquery.Person
 import no.nav.pdl.generated.dto.hentpersonquery.Telefonnummer
 import no.nav.tms.personopplysninger.api.kodeverk.PersonaliaKodeverk
+import no.nav.tms.personopplysninger.api.kontoregister.Konto
+import no.nav.tms.personopplysninger.api.personalia.addresse.Adresser
+import no.nav.tms.personopplysninger.api.personalia.norg2.Norg2EnhetKontaktinfo
+
+data class PersonaliaOgAdresser(
+    val personalia: Personalia,
+    val adresser: Adresser?,
+    val enhetKontaktInformasjon: Norg2EnhetKontaktinfo?
+) {
+    companion object {
+        fun mapResult(
+            person: Person,
+            konto: Konto?,
+            kodeverk: PersonaliaKodeverk,
+            enhetKontaktInformasjon: Norg2EnhetKontaktinfo?
+        ): PersonaliaOgAdresser {
+
+            return PersonaliaOgAdresser(
+                personalia = Personalia.mapPersonalia(
+                    person,
+                    konto,
+                    kodeverk
+                ),
+                adresser = Adresser.mapAdresser(
+                    person,
+                    kodeverk
+                ),
+                enhetKontaktInformasjon
+            )
+        }
+    }
+}
 
 data class Personalia(
     val fornavn: String? = null,

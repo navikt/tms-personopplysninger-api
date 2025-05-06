@@ -23,7 +23,7 @@ data class Environment(
     val inst2ClientId: String = System.getenv("INST2_CLIENT_ID"),
     val digdirKrrProxyClientId: String = System.getenv("DIGDIR_KRR_PROXY_CONSUMER_CLIENT_ID"),
     val medlClientId: String = System.getenv("MEDL_CLIENT_ID"),
-    val pdlClientId: String = System.getenv("PDL_CONSUMER_CLIENT_ID"),
+    val pdlApiClientId: String = System.getenv("PDL_CONSUMER_CLIENT_ID"),
     val pdlMottakClientId: String = System.getenv("PDL_MOTTAK_CLIENT_ID"),
     val kontoregisterClientId: String = System.getenv("KONTOREGISTER_CLIENT_ID"),
     val kodeverkClientId: String = System.getenv("KODEVERK_CLIENT_ID"),

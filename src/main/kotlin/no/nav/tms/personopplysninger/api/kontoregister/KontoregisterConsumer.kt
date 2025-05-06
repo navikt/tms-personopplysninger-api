@@ -1,4 +1,4 @@
-package no.nav.tms.personopplysninger.api.personalia
+package no.nav.tms.personopplysninger.api.kontoregister
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.HttpClient
@@ -16,7 +16,6 @@ import no.nav.tms.personopplysninger.api.common.SingletonCache
 import no.nav.tms.personopplysninger.api.common.HeaderHelper.addNavHeaders
 import no.nav.tms.personopplysninger.api.common.HeaderHelper.authorization
 import no.nav.tms.personopplysninger.api.common.TokenExchanger
-import no.nav.tms.token.support.tokenx.validation.user.TokenXUser
 import java.time.Duration
 
 class KontoregisterConsumer(

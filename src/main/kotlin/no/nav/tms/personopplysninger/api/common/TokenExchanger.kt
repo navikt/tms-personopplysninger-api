@@ -5,13 +5,18 @@ import no.nav.tms.token.support.tokendings.exchange.TokendingsService
 class TokenExchanger(
     private val tokendingsService: TokendingsService,
     private val kontoregisterClientId: String,
-    private val pdlClientId: String,
+    private val pdlApiClientId: String,
+    private val pdlMottakClientId: String,
     private val medlClientId: String,
     private val inst2ClientId: String,
     private val krrProxyClientId: String,
 ) {
-    suspend fun pdlToken(accessToken: String): String {
-        return tokendingsService.exchangeToken(accessToken, pdlClientId)
+    suspend fun pdlApiToken(accessToken: String): String {
+        return tokendingsService.exchangeToken(accessToken, pdlApiClientId)
+    }
+
+    suspend fun pdlMottakToken(accessToken: String): String {
+        return tokendingsService.exchangeToken(accessToken, pdlMottakClientId)
     }
 
     suspend fun kontoregisterToken(accessToken: String): String {

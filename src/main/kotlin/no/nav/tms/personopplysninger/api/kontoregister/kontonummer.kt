@@ -1,4 +1,4 @@
-package no.nav.tms.personopplysninger.api.personalia
+package no.nav.tms.personopplysninger.api.kontoregister
 
 data class Konto(
     val kontonummer: String? = null,

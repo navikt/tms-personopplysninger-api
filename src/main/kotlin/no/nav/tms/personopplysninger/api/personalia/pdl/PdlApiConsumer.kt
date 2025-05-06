@@ -1,4 +1,4 @@
-package no.nav.tms.personopplysninger.api.personalia
+package no.nav.tms.personopplysninger.api.personalia.pdl
 
 import com.expediagroup.graphql.client.types.GraphQLClientError
 import com.expediagroup.graphql.client.types.GraphQLClientRequest
@@ -13,16 +13,16 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import no.nav.pdl.generated.dto.HentKontaktadresseQuery
 import no.nav.pdl.generated.dto.HentPersonQuery
+import no.nav.pdl.generated.dto.HentTelefonQuery
 import no.nav.tms.personopplysninger.api.UserPrincipal
 import no.nav.tms.personopplysninger.api.common.HeaderHelper.addNavHeaders
 import no.nav.tms.personopplysninger.api.common.HeaderHelper.authorization
 import no.nav.tms.personopplysninger.api.common.TokenExchanger
-import no.nav.tms.token.support.tokenx.validation.user.TokenXUser
-import java.net.URL
 import java.util.*
 
-class PdlConsumer(
+class PdlApiConsumer(
     private val httpClient: HttpClient,
     private val pdlUrl: String,
     private val behandlingsnummer: String,
@@ -38,14 +38,27 @@ class PdlConsumer(
             .let { executeQuery(it, user.accessToken) }
     }
 
+    suspend fun hentKontaktadresse(user: UserPrincipal): HentKontaktadresseQuery.Result {
+        return HentKontaktadresseQuery.Variables(ident = user.ident)
+            .let { HentKontaktadresseQuery(it) }
+            .let { executeQuery(it, user.accessToken) }
+    }
+
+    suspend fun hentTelefon(user: UserPrincipal): HentTelefonQuery.Result {
+        return HentTelefonQuery.Variables(ident = user.ident)
+            .let { HentTelefonQuery(it) }
+            .let { executeQuery(it, user.accessToken) }
+    }
+
     private suspend inline fun <reified T : Any> executeQuery(request: GraphQLClientRequest<T>, token: String): T {
-        val pdlToken = tokenExchanger.pdlToken(token)
+        val pdlToken = tokenExchanger.pdlApiToken(token)
 
         val rawResponse = sendQuery(request, pdlToken)
 
         if (!rawResponse.status.isSuccess()) {
             throw RuntimeException("Fikk http-status [${rawResponse.status}] fra PDL.")
         }
+
         val pdlResponse = parseBody<T>(rawResponse)
 
         return pdlResponse.data
