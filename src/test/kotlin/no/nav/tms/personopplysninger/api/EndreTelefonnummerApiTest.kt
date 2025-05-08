@@ -41,9 +41,7 @@ class EndreTelefonnummerApiTest : ApiTest() {
     private val endring = TelefonnummerEndring(landskode = "dummy", nummer = "dummy")
 
     @Test
-    fun `tillater endring av telefonnummer`() = setupApi(
-        internalRouteConfig = internalRouteConfig
-    ).runTest { client ->
+    fun `tillater endring av telefonnummer`() = apiTest(internalRouteConfig) { client ->
 
         val pollEndringPath = "/poll/ending"
         val pollEndringResponse = listOf(PendingEndring(
@@ -78,9 +76,7 @@ class EndreTelefonnummerApiTest : ApiTest() {
     }
 
     @Test
-    fun `svarer med feil ved feil mot pdl-mottak`() = setupApi(
-        internalRouteConfig = internalRouteConfig
-    ).runTest { client ->
+    fun `svarer med feil ved feil mot pdl-mottak`() = apiTest(internalRouteConfig) { client ->
 
         externalService(pdlMottakUrl) {
             post("/api/v1/endringer") {
@@ -98,9 +94,7 @@ class EndreTelefonnummerApiTest : ApiTest() {
     }
 
     @Test
-    fun `videreformidler feilmelding fra pdl-mottak`() = setupApi(
-        internalRouteConfig = internalRouteConfig
-    ).runTest { client ->
+    fun `videreformidler feilmelding fra pdl-mottak`() = apiTest(internalRouteConfig) { client ->
 
         val pollEndringPath = "/poll/ending"
         val pollEndringResponse = listOf(PendingEndring(

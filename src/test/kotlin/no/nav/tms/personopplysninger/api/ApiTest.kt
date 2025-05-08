@@ -12,7 +12,6 @@ import io.ktor.server.auth.*
 import io.ktor.server.routing.*
 import io.ktor.server.testing.*
 import io.ktor.utils.io.*
-import kotlinx.serialization.json.Json
 import no.nav.tms.token.support.idporten.sidecar.mock.idPortenMock
 import no.nav.tms.token.support.tokenx.validation.mock.tokenXMock
 import no.nav.tms.token.support.tokenx.validation.mock.LevelOfAssurance as TokenXLoa
@@ -20,32 +19,54 @@ import no.nav.tms.token.support.idporten.sidecar.mock.LevelOfAssurance as IdPort
 import java.text.DateFormat
 
 abstract class ApiTest {
+
     val ident = "01234567890"
 
     private val objectMapper = jacksonObjectMapper()
 
     @KtorDsl
-    fun setupApi(
+    fun apiTest(
+        internalRouteConfig: (HttpClient) -> (Route.() -> Unit),
         userIdent: String = ident,
         userLoa: UserLoa = UserLoa.High,
-        internalRouteConfig: (HttpClient) -> (Route.() -> Unit)
-    ) = TestConf (
-        userIdent = userIdent,
-        userLoa = userLoa,
-        internalRouteConfig = internalRouteConfig
-    )
+        block: suspend ApplicationTestBuilder.(HttpClient) -> Unit
+    ) = testApplication {
 
-    class TestConf(
-        val userIdent: String,
-        val userLoa: UserLoa,
-        val internalRouteConfig: InternalRouteConfig
-    ) {
-        @KtorDsl
-        fun runTest(
-            block: suspend ApplicationTestBuilder.(HttpClient) -> Unit
-        ) = testApplication {
+        val serverClient = client.config {
+            install(ContentNegotiation) {
+                jackson {
+                    configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                    registerModule(JavaTimeModule())
+                    dateFormat = DateFormat.getDateTimeInstance()
+                }
+            }
+        }
 
-            val serverClient = client.config {
+        application {
+            mainModule(
+                internalRouteConfig(serverClient),
+                serverClient,
+                authInstaller = {
+                    authentication {
+                        idPortenMock {
+                            setAsDefault = true
+                            alwaysAuthenticated = true
+                            staticUserPid = userIdent
+                            staticLevelOfAssurance = userLoa.toIdPortenLoa()
+                        }
+                        tokenXMock {
+                            setAsDefault = false
+                            alwaysAuthenticated = true
+                            staticUserPid = userIdent
+                            staticLevelOfAssurance = userLoa.toTokenXLoa()
+                        }
+                    }
+                }
+            )
+        }
+
+        this.block(
+            client.config {
                 install(ContentNegotiation) {
                     jackson {
                         configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
@@ -54,42 +75,7 @@ abstract class ApiTest {
                     }
                 }
             }
-
-            application {
-                mainModule(
-                    internalRouteConfig(serverClient),
-                    serverClient,
-                    authInstaller = {
-                        authentication {
-                            idPortenMock {
-                                setAsDefault = true
-                                alwaysAuthenticated = true
-                                staticUserPid = userIdent
-                                staticLevelOfAssurance = userLoa.toIdPortenLoa()
-                            }
-                            tokenXMock {
-                                setAsDefault = false
-                                alwaysAuthenticated = true
-                                staticUserPid = userIdent
-                                staticLevelOfAssurance = userLoa.toTokenXLoa()
-                            }
-                        }
-                    }
-                )
-            }
-
-            this.block(
-                client.config {
-                    install(ContentNegotiation) {
-                        jackson {
-                            configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                            registerModule(JavaTimeModule())
-                            dateFormat = DateFormat.getDateTimeInstance()
-                        }
-                    }
-                }
-            )
-        }
+        )
     }
 
     fun ApplicationTestBuilder.externalService(host: String, route: RouteConfig) {
