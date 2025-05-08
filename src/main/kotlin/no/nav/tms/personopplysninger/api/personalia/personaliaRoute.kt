@@ -13,15 +13,13 @@ fun Route.personalia(personaliaService: HentPersonaliaService, oppdaterPersonali
     post("/endreTelefonnummer") {
         val telefonnummer = call.receive<TelefonnummerEndring>()
 
-        val resp = oppdaterPersonaliaService.endreTelefonnummer(call.user, telefonnummer)
-        call.respond(resp)
+        call.respond(oppdaterPersonaliaService.endreTelefonnummer(call.user, telefonnummer))
     }
 
     post("/slettTelefonnummer") {
         val telefonnummer = call.receive<TelefonnummerEndring>()
 
-        val resp = oppdaterPersonaliaService.slettTelefonNummer(call.user, telefonnummer)
-        call.respond(resp)
+        call.respond(oppdaterPersonaliaService.slettTelefonNummer(call.user, telefonnummer))
     }
 }
 

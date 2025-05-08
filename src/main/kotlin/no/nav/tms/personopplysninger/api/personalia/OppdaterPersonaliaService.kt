@@ -1,6 +1,5 @@
 package no.nav.tms.personopplysninger.api.personalia
 
-import no.nav.pdl.generated.dto.HentKontaktadresseQuery
 import no.nav.pdl.generated.dto.HentTelefonQuery
 import no.nav.tms.personopplysninger.api.UserPrincipal
 import no.nav.tms.personopplysninger.api.personalia.pdl.PdlApiConsumer
@@ -11,7 +10,7 @@ class OppdaterPersonaliaService(
     private val pdlMottakConsumer: PdlMottakConsumer
 ) {
 
-    suspend fun endreTelefonnummer(user: UserPrincipal, telefonnummer: TelefonnummerEndring): Endring {
+    suspend fun endreTelefonnummer(user: UserPrincipal, telefonnummer: TelefonnummerEndring): EndringResult {
         if (!setOf(1, 2).contains(telefonnummer.prioritet)) {
             throw RuntimeException("Støtter kun prioritet [1, 2] eller type ['HJEM', 'MOBIL']")
         } else {
@@ -19,7 +18,7 @@ class OppdaterPersonaliaService(
         }
     }
 
-    suspend fun slettTelefonNummer(user: UserPrincipal, telefonnummer: TelefonnummerEndring): Endring {
+    suspend fun slettTelefonNummer(user: UserPrincipal, telefonnummer: TelefonnummerEndring): EndringResult {
         return pdlApiConsumer.hentTelefon(user)
             .let { findOpplysningsId(it, telefonnummer.landskode, telefonnummer.nummer)}
             .let { pdlMottakConsumer.slettTelefonnummer(user, it) }

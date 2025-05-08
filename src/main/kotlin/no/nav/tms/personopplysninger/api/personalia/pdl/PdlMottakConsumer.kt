@@ -12,7 +12,8 @@ import no.nav.tms.personopplysninger.api.common.ConsumerException
 import no.nav.tms.personopplysninger.api.common.HeaderHelper.addNavHeaders
 import no.nav.tms.personopplysninger.api.common.HeaderHelper.authorization
 import no.nav.tms.personopplysninger.api.common.TokenExchanger
-import no.nav.tms.personopplysninger.api.personalia.Endring
+import no.nav.tms.personopplysninger.api.personalia.EndringResult
+import no.nav.tms.personopplysninger.api.personalia.PendingEndring
 import no.nav.tms.personopplysninger.api.personalia.TelefonnummerEndring
 import no.nav.tms.personopplysninger.api.personalia.pdl.OppdaterTelefonnummer.Companion.endreTelefonnummerPayload
 import no.nav.tms.personopplysninger.api.personalia.pdl.OppdaterTelefonnummer.Companion.slettTelefonnummerPayload
@@ -24,17 +25,17 @@ class PdlMottakConsumer(
 ) {
     private val log = KotlinLogging.logger {}
 
-    suspend fun endreTelefonnummer(user: UserPrincipal, telefonnummer: TelefonnummerEndring): Endring {
+    suspend fun endreTelefonnummer(user: UserPrincipal, telefonnummer: TelefonnummerEndring): EndringResult {
         val payload = endreTelefonnummerPayload(user.ident, telefonnummer)
         return sendPdlEndring(user, payload)
     }
 
-    suspend fun slettTelefonnummer(user: UserPrincipal, opplysningsId: String): Endring {
+    suspend fun slettTelefonnummer(user: UserPrincipal, opplysningsId: String): EndringResult {
         val payload = slettTelefonnummerPayload(user.ident, opplysningsId)
         return sendPdlEndring(user, payload)
     }
 
-    private suspend fun sendPdlEndring(user: UserPrincipal, payload: OppdaterTelefonnummer): Endring {
+    private suspend fun sendPdlEndring(user: UserPrincipal, payload: OppdaterTelefonnummer): EndringResult {
         val exchangedToken = tokenExchanger.pdlMottakToken(user.accessToken)
 
         val response =
@@ -53,17 +54,17 @@ class PdlMottakConsumer(
         }
     }
 
-    private suspend fun readResponseAndPollStatus(accessToken: String, response: HttpResponse): Endring {
+    private suspend fun readResponseAndPollStatus(accessToken: String, response: HttpResponse): EndringResult {
         return when {
             response.status == HttpStatusCode.Locked -> {
                 log.info {"Oppdatering avvist pga status pending." }
-                Endring(statusType = "REJECTED", error = response.body())
+                EndringResult(statusType = "REJECTED", error = response.body())
             }
 
             response.status == HttpStatusCode.UnprocessableEntity -> {
                 val responseBody = response.bodyAsText()
                 log.error {"Fikk valideringsfeil: $responseBody" }
-                Endring(statusType = "ERROR", error = response.body())
+                EndringResult(statusType = "ERROR", error = response.body())
             }
 
             !response.status.isSuccess() -> {
@@ -79,8 +80,8 @@ class PdlMottakConsumer(
         }
     }
 
-    private suspend fun pollEndring(accessToken: String, url: String): Endring {
-        var endring: Endring
+    private suspend fun pollEndring(accessToken: String, url: String): EndringResult {
+        var pendingEndring: PendingEndring
         var i = 0
         do {
             try {
@@ -92,20 +93,22 @@ class PdlMottakConsumer(
             val response: HttpResponse =
                 client.get(url) {
                     authorization(accessToken)
-
                 }
-            endring = response.body<List<Endring>>().first()
-        } while (++i < 5 && endring.isPending())
+            pendingEndring = response.body<List<PendingEndring>>().first()
+        } while (++i < 5 && pendingEndring.isPending())
+
         log.info { "Antall polls for status: $i" }
 
-        if (!endring.confirmedOk()) {
-            if (endring.hasTpsError()) {
-                endring.addValidationError()
-            } else {
+        return if (pendingEndring.confirmedOk()) {
+            EndringResult.ok()
+        } else {
+            if (!pendingEndring.hasTpsError()) {
                 log.warn { "Polling timet ut før endring ble bekreftet OK av pdl-mottak" }
+                EndringResult.ok()
+            } else {
+                EndringResult.withError(pendingEndring)
             }
         }
-        return endring
     }
 }
 

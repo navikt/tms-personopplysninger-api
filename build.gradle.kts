@@ -65,6 +65,10 @@ dependencies {
     testImplementation(TestContainers.postgresql)
     testImplementation(Kotest.runnerJunit5)
     testImplementation(Kotest.assertionsCore)
+    testImplementation(Ktor.Test.serverTestHost)
+    testImplementation(Ktor.Test.clientMock)
+    testImplementation(TmsKtorTokenSupport.tokenXValidationMock)
+    testImplementation(TmsKtorTokenSupport.idportenSidecarMock)
 }
 
 application {
