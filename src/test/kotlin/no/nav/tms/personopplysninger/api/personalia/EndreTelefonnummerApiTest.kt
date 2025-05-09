@@ -14,6 +14,7 @@ import no.nav.tms.personopplysninger.api.InternalRouteConfig
 import no.nav.tms.personopplysninger.api.common.HeaderHelper
 import no.nav.tms.personopplysninger.api.common.TokenExchanger
 import no.nav.tms.personopplysninger.api.personalia.pdl.*
+import no.nav.tms.personopplysninger.api.routeConfig
 import org.junit.jupiter.api.Test
 
 class EndreTelefonnummerApiTest : ApiTest() {
@@ -34,14 +35,12 @@ class EndreTelefonnummerApiTest : ApiTest() {
         val pdlApiConsumer = PdlApiConsumer(client, pdlApiUrl, behandlingsnummer, tokenExchanger)
         val pdlMottakConsumer = PdlMottakConsumer(client, pdlMottakUrl, tokenExchanger, pollCount = 1, pollIntervalMs = 50)
 
-        val route: Route.() -> Unit = {
+        routeConfig {
             personalia(
                 personaliaService = mockk(),
                 oppdaterPersonaliaService = OppdaterPersonaliaService(pdlApiConsumer, pdlMottakConsumer)
             )
         }
-
-        route
     }
 
     private val endreTelefonnummerPath = "/endreTelefonnummer"
@@ -104,7 +103,7 @@ class EndreTelefonnummerApiTest : ApiTest() {
     }
 
     @Test
-    fun `bruker riktig headers`() = apiTest(internalRouteConfig) { client ->
+    fun `bruker riktige headers mot pdl-mottak`() = apiTest(internalRouteConfig) { client ->
 
         var headers: Headers? = null
 
@@ -130,7 +129,7 @@ class EndreTelefonnummerApiTest : ApiTest() {
     }
 
     @Test
-    fun `svarer med feil ved feil mot pdl-mottak`() = apiTest(internalRouteConfig) { client ->
+    fun `svarer med InternalServerError ved feil mot pdl-mottak`() = apiTest(internalRouteConfig) { client ->
 
         externalService(pdlMottakUrl) {
             post("/api/v1/endringer") {

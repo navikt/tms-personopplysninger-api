@@ -1,6 +1,7 @@
 package no.nav.tms.personopplysninger.api
 
 import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.client.*
@@ -79,7 +80,7 @@ abstract class ApiTest {
         )
     }
 
-    fun ApplicationTestBuilder.externalService(host: String, route: RouteConfig) {
+    fun ApplicationTestBuilder.externalService(host: String, route: Route.() -> Unit) {
         externalServices {
             hosts(host) {
                 install(io.ktor.server.plugins.contentnegotiation.ContentNegotiation) {
@@ -97,6 +98,8 @@ abstract class ApiTest {
     suspend fun HttpResponse.json() = bodyAsText().let { objectMapper.readTree(it) }
     suspend fun ApplicationCall.receiveJson() = receiveText().let { objectMapper.readTree(it) }
 
+    fun JsonNode.asTextOrNull() = if(isNull) null else asText()
+
     enum class UserLoa {
         Substantial, High;
 
@@ -106,6 +109,7 @@ abstract class ApiTest {
     }
 }
 
-typealias InternalRouteConfig = (HttpClient) -> RouteConfig
-typealias RouteConfig = Route.() -> Unit
+typealias InternalRouteConfig = (HttpClient) -> (Route.() -> Unit)
 
+@KtorDsl
+fun routeConfig(block: Route.() -> Unit) = block

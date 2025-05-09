@@ -17,6 +17,7 @@ import no.nav.tms.personopplysninger.api.personalia.pdl.EndringsType
 import no.nav.tms.personopplysninger.api.personalia.pdl.PdlApiConsumer
 import no.nav.tms.personopplysninger.api.personalia.pdl.PdlMottakConsumer
 import no.nav.tms.personopplysninger.api.personalia.pdl.PendingEndring
+import no.nav.tms.personopplysninger.api.routeConfig
 import org.junit.jupiter.api.Test
 
 class SlettTelefonnummerApiTest : ApiTest() {
@@ -37,14 +38,12 @@ class SlettTelefonnummerApiTest : ApiTest() {
         val pdlMottakConsumer =
             PdlMottakConsumer(client, pdlMottakUrl, tokenExchanger, pollCount = 1, pollIntervalMs = 50)
 
-        val route: Route.() -> Unit = {
+        routeConfig {
             personalia(
                 personaliaService = mockk(),
                 oppdaterPersonaliaService = OppdaterPersonaliaService(pdlApiConsumer, pdlMottakConsumer)
             )
         }
-
-        route
     }
 
     private val slettTelefonnummerPath = "/slettTelefonnummer"
@@ -116,7 +115,7 @@ class SlettTelefonnummerApiTest : ApiTest() {
     }
 
     @Test
-    fun `bruker riktig headers`() = apiTest(internalRouteConfig) { client ->
+    fun `bruker riktige headers mot pdl-api og pdl-mottak`() = apiTest(internalRouteConfig) { client ->
 
         var apiHeaders: Headers? = null
         var mottakHeaders: Headers? = null
@@ -162,7 +161,7 @@ class SlettTelefonnummerApiTest : ApiTest() {
     }
 
     @Test
-    fun `svarer med feil ved feil mot pdl-api`() = apiTest(internalRouteConfig) { client ->
+    fun `svarer med InternalServerError ved feil mot pdl-api`() = apiTest(internalRouteConfig) { client ->
 
         externalService(pdlApiUrl) {
             post("/graphql") {
@@ -180,7 +179,7 @@ class SlettTelefonnummerApiTest : ApiTest() {
     }
 
     @Test
-    fun `svarer med feil ved feil mot pdl-mottak`() = apiTest(internalRouteConfig) { client ->
+    fun `svarer med InternalServerError ved feil mot pdl-mottak`() = apiTest(internalRouteConfig) { client ->
 
         externalService(pdlApiUrl) {
             post("/graphql") {
