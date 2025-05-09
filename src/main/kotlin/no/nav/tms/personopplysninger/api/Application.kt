@@ -15,6 +15,7 @@ import no.nav.tms.personopplysninger.api.medl.MedlConsumer
 import no.nav.tms.personopplysninger.api.medl.MedlService
 import no.nav.tms.personopplysninger.api.medl.medl
 import no.nav.tms.personopplysninger.api.kontoregister.KontoregisterConsumer
+import no.nav.tms.personopplysninger.api.kontoregister.kontoregisterRoute
 import no.nav.tms.personopplysninger.api.personalia.pdl.PdlApiConsumer
 import no.nav.tms.personopplysninger.api.personalia.HentPersonaliaService
 import no.nav.tms.personopplysninger.api.personalia.OppdaterPersonaliaService
@@ -45,10 +46,12 @@ fun main() {
     val pdlApiConsumer = PdlApiConsumer(httpClient, environment.pdlUrl, environment.pdlBehandlingsnummer, tokenExchanger)
     val pdlMottakConsumer = PdlMottakConsumer(httpClient, environment.pdlMottakUrl, tokenExchanger)
 
+    val kontoregisterConsumer = KontoregisterConsumer(httpClient, environment.kontoregisterUrl, tokenExchanger)
+
     val hentPersonaliaService = HentPersonaliaService(
         kodeverkConsumer = kodeverkConsumer,
         norg2Consumer = Norg2Consumer(httpClient, environment.norg2Url),
-        kontoregisterConsumer = KontoregisterConsumer(httpClient, environment.kontoregisterUrl, tokenExchanger),
+        kontoregisterConsumer = kontoregisterConsumer,
         pdlApiConsumer = pdlApiConsumer,
     )
 
@@ -78,6 +81,7 @@ fun main() {
         medl(medlService)
         institusjon(institusjonConsumer)
         kontaktinformasjon(kontaktinformasjonService)
+        kontoregisterRoute(kontoregisterConsumer)
     }
 
     embeddedServer(

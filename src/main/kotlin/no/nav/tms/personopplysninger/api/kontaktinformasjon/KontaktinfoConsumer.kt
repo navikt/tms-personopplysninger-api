@@ -21,8 +21,7 @@ class KontaktinfoConsumer(
         val response: HttpResponse =
             client.get("$krrProxyUrl/rest/v1/person") {
                 authorization(tokenExchanger.krrProxyToken(user.accessToken))
-                addNavHeaders()
-                header("Nav-Personident", user.ident)
+                addNavHeaders(user.ident)
             }
 
         return if (response.status.isSuccess()) {

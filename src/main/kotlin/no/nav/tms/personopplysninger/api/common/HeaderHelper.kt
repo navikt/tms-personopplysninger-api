@@ -5,13 +5,18 @@ import io.ktor.http.*
 import java.util.UUID
 
 object HeaderHelper {
-    private const val CALL_ID_HEADER_NAME = "Nav-Call-Id"
-    private const val NAV_CONSUMER_ID_HEADER_NAME = "Nav-Consumer-Id"
-    private const val NAV_CONSUMER_ID = "tms-personopplysninger-api"
+    const val CALL_ID_HEADER = "Nav-Call-Id"
+    const val NAV_CONSUMER_ID_HEADER = "Nav-Consumer-Id"
+    const val NAV_CONSUMER_ID = "tms-personopplysninger-api"
+    const val NAV_PERSONIDENT_HEADER = "Nav-Personident"
 
-    fun HttpRequestBuilder.addNavHeaders() {
-        header(CALL_ID_HEADER_NAME, UUID.randomUUID().toString())
-        header(NAV_CONSUMER_ID_HEADER_NAME, NAV_CONSUMER_ID)
+    fun HttpRequestBuilder.addNavHeaders(ident: String? = null) {
+        header(CALL_ID_HEADER, UUID.randomUUID().toString())
+        header(NAV_CONSUMER_ID_HEADER, NAV_CONSUMER_ID)
+
+        if (ident != null) {
+            header(NAV_PERSONIDENT_HEADER, ident)
+        }
     }
 
     fun HttpRequestBuilder.authorization(token: String) {

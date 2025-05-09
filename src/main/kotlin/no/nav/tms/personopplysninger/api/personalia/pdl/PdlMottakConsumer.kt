@@ -13,7 +13,6 @@ import no.nav.tms.personopplysninger.api.common.HeaderHelper.addNavHeaders
 import no.nav.tms.personopplysninger.api.common.HeaderHelper.authorization
 import no.nav.tms.personopplysninger.api.common.TokenExchanger
 import no.nav.tms.personopplysninger.api.personalia.EndringResult
-import no.nav.tms.personopplysninger.api.personalia.PendingEndring
 import no.nav.tms.personopplysninger.api.personalia.TelefonnummerEndring
 import no.nav.tms.personopplysninger.api.personalia.pdl.OppdaterTelefonnummer.Companion.endreTelefonnummerPayload
 import no.nav.tms.personopplysninger.api.personalia.pdl.OppdaterTelefonnummer.Companion.slettTelefonnummerPayload
@@ -22,6 +21,9 @@ class PdlMottakConsumer(
     private val client: HttpClient,
     private val pdlMottakUrl: String,
     private val tokenExchanger: TokenExchanger,
+    private val pollCount: Int = 5,
+    private val pollIntervalMs: Long = 1000,
+
 ) {
     private val log = KotlinLogging.logger {}
 
@@ -85,7 +87,7 @@ class PdlMottakConsumer(
         var i = 0
         do {
             try {
-                delay(1000)
+                delay(pollIntervalMs)
             } catch (ie: InterruptedException) {
                 throw RuntimeException("Fikk feil under polling på status", ie)
             }
@@ -95,7 +97,7 @@ class PdlMottakConsumer(
                     authorization(accessToken)
                 }
             pendingEndring = response.body<List<PendingEndring>>().first()
-        } while (++i < 5 && pendingEndring.isPending())
+        } while (++i < pollCount && pendingEndring.isPending())
 
         log.info { "Antall polls for status: $i" }
 
@@ -110,8 +112,8 @@ class PdlMottakConsumer(
             }
         }
     }
-}
 
-private data class PersonEndring(val personopplysninger: List<OppdaterTelefonnummer>) {
-    constructor(personopplysning: OppdaterTelefonnummer) : this(listOf(personopplysning))
+    data class PersonEndring(val personopplysninger: List<OppdaterTelefonnummer>) {
+        constructor(personopplysning: OppdaterTelefonnummer) : this(listOf(personopplysning))
+    }
 }

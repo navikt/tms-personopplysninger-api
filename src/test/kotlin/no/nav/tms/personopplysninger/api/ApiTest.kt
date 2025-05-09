@@ -9,6 +9,7 @@ import io.ktor.client.statement.*
 import io.ktor.serialization.jackson.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
+import io.ktor.server.request.*
 import io.ktor.server.routing.*
 import io.ktor.server.testing.*
 import io.ktor.utils.io.*
@@ -20,14 +21,14 @@ import java.text.DateFormat
 
 abstract class ApiTest {
 
-    val ident = "01234567890"
+    val testIdent = "01234567890"
 
     private val objectMapper = jacksonObjectMapper()
 
     @KtorDsl
     fun apiTest(
         internalRouteConfig: (HttpClient) -> (Route.() -> Unit),
-        userIdent: String = ident,
+        userIdent: String = testIdent,
         userLoa: UserLoa = UserLoa.High,
         block: suspend ApplicationTestBuilder.(HttpClient) -> Unit
     ) = testApplication {
@@ -94,6 +95,7 @@ abstract class ApiTest {
     }
 
     suspend fun HttpResponse.json() = bodyAsText().let { objectMapper.readTree(it) }
+    suspend fun ApplicationCall.receiveJson() = receiveText().let { objectMapper.readTree(it) }
 
     enum class UserLoa {
         Substantial, High;
