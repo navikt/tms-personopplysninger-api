@@ -7,10 +7,12 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.client.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.statement.*
+import io.ktor.http.*
 import io.ktor.serialization.jackson.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.request.*
+import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.testing.*
 import io.ktor.utils.io.*
@@ -20,7 +22,7 @@ import no.nav.tms.token.support.tokenx.validation.mock.LevelOfAssurance as Token
 import no.nav.tms.token.support.idporten.sidecar.mock.LevelOfAssurance as IdPortenLoa
 import java.text.DateFormat
 
-abstract class ApiTest {
+abstract class RouteTest {
 
     val testIdent = "01234567890"
 

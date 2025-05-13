@@ -4,28 +4,23 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.ktor.client.request.*
-import io.ktor.client.statement.bodyAsText
 import io.ktor.http.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.mockk.coEvery
 import io.mockk.mockk
-import no.nav.tms.personopplysninger.api.ApiTest
+import no.nav.tms.personopplysninger.api.RouteTest
 import no.nav.tms.personopplysninger.api.InternalRouteConfig
 import no.nav.tms.personopplysninger.api.common.HeaderHelper
 import no.nav.tms.personopplysninger.api.common.TokenExchanger
 import no.nav.tms.personopplysninger.api.routeConfig
 import org.junit.jupiter.api.Test
 
-class HentLandApiTest : ApiTest() {
+class HentLandRouteTest : RouteTest() {
 
     private val kontoRegisterUrl = "http://kontoregister"
-    private val kontoregisterToken = "<konto-token>"
 
-
-    private val tokenExchanger: TokenExchanger = mockk<TokenExchanger>().also {
-        coEvery { it.kontoregisterToken(any()) } returns kontoregisterToken
-    }
+    private val tokenExchanger: TokenExchanger = mockk<TokenExchanger>()
 
     private val internalRouteConfig: InternalRouteConfig = { client ->
         routeConfig {
@@ -37,21 +32,23 @@ class HentLandApiTest : ApiTest() {
 
     private val hentLandPath = "/land"
 
+    private val externalResponse = """
+[
+    {
+      "landkode" : "NO",
+      "land" : "Norge",
+      "kreverIban" : true,
+      "ibanLengde" : 15,
+      "kreverBankkode" : false
+    }
+]
+    """
+
     @Test
     fun `henter landkoder via kontaktregister`() = apiTest(internalRouteConfig) {client ->
         externalService(kontoRegisterUrl) {
             get("/api/system/v1/hent-landkoder") {
-                call.respond(listOf(
-                    KontoResponse.Landkode(
-                        landkode = "AO",
-                        land = "Angola",
-                        kreverIban = false,
-                        ibanLengde = 25,
-                        kreverBankkode = false,
-                        bankkodeLengde = null,
-                        alternativLandkode = null
-                    )
-                ))
+                call.respondText(externalResponse, ContentType.Application.Json)
             }
         }
 
@@ -59,10 +56,10 @@ class HentLandApiTest : ApiTest() {
 
         response.status shouldBe HttpStatusCode.OK
         response.json().first().let {
-            it["landkode"].asText() shouldBe "AO"
-            it["land"].asText() shouldBe "Angola"
-            it["kreverIban"].asBoolean() shouldBe false
-            it["ibanLengde"].asInt() shouldBe 25
+            it["landkode"].asText() shouldBe "NO"
+            it["land"].asText() shouldBe "Norge"
+            it["kreverIban"].asBoolean() shouldBe true
+            it["ibanLengde"].asInt() shouldBe 15
             it["kreverBankkode"].asBoolean() shouldBe false
             it["bankkodeLengde"].asTextOrNull() shouldBe null
             it["alternativLandkode"].asTextOrNull() shouldBe null

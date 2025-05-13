@@ -9,7 +9,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.mockk.coEvery
 import io.mockk.mockk
-import no.nav.tms.personopplysninger.api.ApiTest
+import no.nav.tms.personopplysninger.api.RouteTest
 import no.nav.tms.personopplysninger.api.InternalRouteConfig
 import no.nav.tms.personopplysninger.api.common.HeaderHelper
 import no.nav.tms.personopplysninger.api.common.TokenExchanger
@@ -20,7 +20,7 @@ import no.nav.tms.personopplysninger.api.personalia.pdl.PendingEndring
 import no.nav.tms.personopplysninger.api.routeConfig
 import org.junit.jupiter.api.Test
 
-class SlettTelefonnummerApiTest : ApiTest() {
+class SlettTelefonnummerRouteTest : RouteTest() {
 
     private val pdlApiUrl = "http://pdl-api"
     private val pdlMottakUrl = "http://pdl-mottak"
@@ -67,11 +67,11 @@ class SlettTelefonnummerApiTest : ApiTest() {
 
         externalService(pdlApiUrl) {
             post("/graphql") {
-                call.respond(PdlResponseBuilder.hentTelefonnummerResponse(
+                call.respondText(PdlResponseBuilder.hentTelefonnummerResponse(
                     landskode = slettRequest.landskode,
                     nummer = slettRequest.nummer,
                     opplysningsId = opplysningsId
-                ))
+                ), contentType = ContentType.Application.Json)
             }
         }
 
@@ -124,11 +124,11 @@ class SlettTelefonnummerApiTest : ApiTest() {
             post("/graphql") {
                 apiHeaders = call.request.headers
 
-                call.respond(PdlResponseBuilder.hentTelefonnummerResponse(
+                call.respondText(PdlResponseBuilder.hentTelefonnummerResponse(
                     landskode = slettRequest.landskode,
                     nummer = slettRequest.nummer,
                     opplysningsId = "123"
-                ))
+                ), contentType = ContentType.Application.Json)
             }
         }
 
@@ -183,11 +183,11 @@ class SlettTelefonnummerApiTest : ApiTest() {
 
         externalService(pdlApiUrl) {
             post("/graphql") {
-                call.respond(PdlResponseBuilder.hentTelefonnummerResponse(
+                call.respondText(PdlResponseBuilder.hentTelefonnummerResponse(
                     landskode = slettRequest.landskode,
                     nummer = slettRequest.nummer,
                     opplysningsId = "123"
-                ))
+                ), contentType = ContentType.Application.Json)
             }
         }
 
@@ -210,29 +210,32 @@ class SlettTelefonnummerApiTest : ApiTest() {
     fun `videreformidler feilmelding fra pdl-mottak`() = apiTest(internalRouteConfig) { client ->
 
         val pollEndringPath = "/poll/endring"
-        val pollEndringResponse = listOf(
-            PendingEndring(
-                status = PendingEndring.Status(
-                    statusType = "VALIDERINGSFEIL",
-                    substatus = listOf(
-                        PendingEndring.Substatus(
-                            beskrivelse = "Person ikke funnet i TPS",
-                            domene = "TPS",
-                            kode = "VALIDERINGSFEIL",
-                            referanse = "b8a2619b-1e9e-4d67-9d16-3ec678791685",
-                            status = "ERROR"
-                        )
-                    )
-                )
-            )
-        )
+        val pollEndringResponse = """
+            [
+                {
+                    "status": {
+                        "statusType": "VALIDERINGSFEIL",
+                        "substatus": [ 
+                            {
+                                "beskrivelse": "Person ikke funnet i TPS",
+                                "domene": "TPS",
+                                "kode": "VALIDERINGSFEIL",
+                                "referanse": "b8a2619b-1e9e-4d67-9d16-3ec678791685",
+                                "status": "ERROR"
+                            }
+                        ]
+                    }
+                }            
+            ]
+        """
+
         externalService(pdlApiUrl) {
             post("/graphql") {
-                call.respond(PdlResponseBuilder.hentTelefonnummerResponse(
+                call.respondText(PdlResponseBuilder.hentTelefonnummerResponse(
                     landskode = slettRequest.landskode,
                     nummer = slettRequest.nummer,
                     opplysningsId = "123"
-                ))
+                ), contentType = ContentType.Application.Json)
             }
         }
 
@@ -244,7 +247,7 @@ class SlettTelefonnummerApiTest : ApiTest() {
             }
 
             get(pollEndringPath) {
-                call.respond(pollEndringResponse)
+                call.respondText(pollEndringResponse, contentType = ContentType.Application.Json)
             }
         }
 
@@ -266,21 +269,21 @@ class SlettTelefonnummerApiTest : ApiTest() {
     @Test
     fun `svarer ok dersom polling mot pdl-mottak og status enda er PENDING`() = apiTest(internalRouteConfig) { client ->
         val pollEndringPath = "/poll/endring"
-        val pollEndringResponse = listOf(
-            PendingEndring(
-                status = PendingEndring.Status(
-                    statusType = "PENDING"
-                )
-            )
-        )
+        val pollEndringResponse = """
+            [
+                {
+                    "status": {"statusType": "PENDING"}
+                }
+            ]
+        """
 
         externalService(pdlApiUrl) {
             post("/graphql") {
-                call.respond(PdlResponseBuilder.hentTelefonnummerResponse(
+                call.respondText(PdlResponseBuilder.hentTelefonnummerResponse(
                     landskode = slettRequest.landskode,
                     nummer = slettRequest.nummer,
                     opplysningsId = "123"
-                ))
+                ), contentType = ContentType.Application.Json)
             }
         }
 
@@ -291,7 +294,7 @@ class SlettTelefonnummerApiTest : ApiTest() {
             }
 
             get(pollEndringPath) {
-                call.respond(pollEndringResponse)
+                call.respondText(pollEndringResponse, contentType = ContentType.Application.Json)
             }
         }
 
