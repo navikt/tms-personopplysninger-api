@@ -7,7 +7,6 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import io.mockk.coEvery
 import io.mockk.mockk
 import no.nav.tms.personopplysninger.api.RouteTest
 import no.nav.tms.personopplysninger.api.InternalRouteConfig
@@ -24,7 +23,7 @@ class HentValutaRouteTest : RouteTest() {
 
     private val internalRouteConfig: InternalRouteConfig = { client ->
         routeConfig {
-            kontoregisterRoute(
+            kontoregisterRoutes(
                 KontoregisterConsumer(client, kontoRegisterUrl, tokenExchanger)
             )
         }

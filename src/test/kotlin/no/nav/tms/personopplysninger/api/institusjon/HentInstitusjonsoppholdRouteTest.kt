@@ -1,7 +1,6 @@
 package no.nav.tms.personopplysninger.api.institusjon
 
 import com.fasterxml.jackson.databind.JsonNode
-import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.ktor.client.request.*
@@ -18,10 +17,10 @@ import no.nav.tms.personopplysninger.api.kontoregister.KontoResponse
 import no.nav.tms.personopplysninger.api.routeConfig
 import org.junit.jupiter.api.Test
 
-class InstitusjonRouteTest: RouteTest() {
+class HentInstitusjonsoppholdRouteTest: RouteTest() {
 
     private val inst2Url = "http://inst2"
-    private val inst2Token = "<inst2 token>"
+    private val inst2Token = "<inst2-token>"
 
     private val tokenExchanger: TokenExchanger = mockk<TokenExchanger>().also {
         coEvery { it.inst2Token(any()) } returns inst2Token
@@ -29,7 +28,7 @@ class InstitusjonRouteTest: RouteTest() {
 
     private val internalRouteConfig: InternalRouteConfig = { client ->
         routeConfig {
-            institusjonRoute(
+            institusjonRoutes(
                 InstitusjonConsumer(client, inst2Url, tokenExchanger)
             )
         }

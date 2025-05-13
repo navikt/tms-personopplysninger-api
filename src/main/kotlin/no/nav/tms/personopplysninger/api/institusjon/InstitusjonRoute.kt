@@ -5,7 +5,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import no.nav.tms.personopplysninger.api.user
 
-fun Route.institusjonRoute(institusjonConsumer: InstitusjonConsumer) {
+fun Route.institusjonRoutes(institusjonConsumer: InstitusjonConsumer) {
     get("/institusjonsopphold") {
         call.respond(institusjonConsumer.hentInstitusjonsopphold(call.user))
     }

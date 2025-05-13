@@ -6,16 +6,17 @@ import io.ktor.server.netty.Netty
 import io.ktor.server.routing.*
 import no.nav.tms.personopplysninger.api.common.TokenExchanger
 import no.nav.tms.personopplysninger.api.institusjon.InstitusjonConsumer
-import no.nav.tms.personopplysninger.api.institusjon.institusjonRoute
+import no.nav.tms.personopplysninger.api.institusjon.institusjonRoutes
 import no.nav.tms.personopplysninger.api.kodeverk.KodeverkConsumer
+import no.nav.tms.personopplysninger.api.kodeverk.kodeverkRoutes
 import no.nav.tms.personopplysninger.api.kontaktinformasjon.KontaktinfoConsumer
 import no.nav.tms.personopplysninger.api.kontaktinformasjon.KontaktinformasjonService
-import no.nav.tms.personopplysninger.api.kontaktinformasjon.kontaktinformasjon
+import no.nav.tms.personopplysninger.api.kontaktinformasjon.kontaktinformasjonRoutes
 import no.nav.tms.personopplysninger.api.medl.MedlConsumer
 import no.nav.tms.personopplysninger.api.medl.MedlService
 import no.nav.tms.personopplysninger.api.medl.medl
 import no.nav.tms.personopplysninger.api.kontoregister.KontoregisterConsumer
-import no.nav.tms.personopplysninger.api.kontoregister.kontoregisterRoute
+import no.nav.tms.personopplysninger.api.kontoregister.kontoregisterRoutes
 import no.nav.tms.personopplysninger.api.personalia.pdl.PdlApiConsumer
 import no.nav.tms.personopplysninger.api.personalia.HentPersonaliaService
 import no.nav.tms.personopplysninger.api.personalia.OppdaterPersonaliaService
@@ -79,9 +80,10 @@ fun main() {
     val userRoutes: Route.() -> Unit = {
         personalia(hentPersonaliaService, oppdaterPersonaliaService)
         medl(medlService)
-        institusjonRoute(institusjonConsumer)
-        kontaktinformasjon(kontaktinformasjonService)
-        kontoregisterRoute(kontoregisterConsumer)
+        institusjonRoutes(institusjonConsumer)
+        kontaktinformasjonRoutes(kontaktinformasjonService)
+        kontoregisterRoutes(kontoregisterConsumer)
+        kodeverkRoutes(kodeverkConsumer)
     }
 
     embeddedServer(

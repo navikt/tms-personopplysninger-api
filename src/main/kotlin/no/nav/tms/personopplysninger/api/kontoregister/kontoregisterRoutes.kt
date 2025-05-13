@@ -3,7 +3,7 @@ package no.nav.tms.personopplysninger.api.kontoregister
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
-fun Route.kontoregisterRoute(kontoregisterConsumer: KontoregisterConsumer) {
+fun Route.kontoregisterRoutes(kontoregisterConsumer: KontoregisterConsumer) {
     get("/land") {
         call.respond(kontoregisterConsumer.hentLandkoder())
     }
