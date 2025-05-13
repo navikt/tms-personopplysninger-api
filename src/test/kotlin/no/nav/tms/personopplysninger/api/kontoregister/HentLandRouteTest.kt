@@ -45,7 +45,7 @@ class HentLandRouteTest : RouteTest() {
     """
 
     @Test
-    fun `henter landkoder via kontaktregister`() = apiTest(internalRouteConfig) {client ->
+    fun `henter landkoder via kontoregister`() = apiTest(internalRouteConfig) {client ->
         externalService(kontoRegisterUrl) {
             get("/api/system/v1/hent-landkoder") {
                 call.respondText(externalResponse, ContentType.Application.Json)

@@ -6,7 +6,7 @@ import io.ktor.server.netty.Netty
 import io.ktor.server.routing.*
 import no.nav.tms.personopplysninger.api.common.TokenExchanger
 import no.nav.tms.personopplysninger.api.institusjon.InstitusjonConsumer
-import no.nav.tms.personopplysninger.api.institusjon.institusjon
+import no.nav.tms.personopplysninger.api.institusjon.institusjonRoute
 import no.nav.tms.personopplysninger.api.kodeverk.KodeverkConsumer
 import no.nav.tms.personopplysninger.api.kontaktinformasjon.KontaktinfoConsumer
 import no.nav.tms.personopplysninger.api.kontaktinformasjon.KontaktinformasjonService
@@ -79,7 +79,7 @@ fun main() {
     val userRoutes: Route.() -> Unit = {
         personalia(hentPersonaliaService, oppdaterPersonaliaService)
         medl(medlService)
-        institusjon(institusjonConsumer)
+        institusjonRoute(institusjonConsumer)
         kontaktinformasjon(kontaktinformasjonService)
         kontoregisterRoute(kontoregisterConsumer)
     }

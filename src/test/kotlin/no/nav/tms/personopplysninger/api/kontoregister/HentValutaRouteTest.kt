@@ -45,7 +45,7 @@ class HentValutaRouteTest : RouteTest() {
     """
 
     @Test
-    fun `henter landkoder via kontaktregister`() = apiTest(internalRouteConfig) {client ->
+    fun `henter valutakoder via kontoregister`() = apiTest(internalRouteConfig) {client ->
 
         externalService(kontoRegisterUrl) {
             get("/api/system/v1/hent-valutakoder") {
