@@ -14,7 +14,7 @@ import no.nav.tms.personopplysninger.api.kontaktinformasjon.KontaktinformasjonSe
 import no.nav.tms.personopplysninger.api.kontaktinformasjon.kontaktinformasjonRoutes
 import no.nav.tms.personopplysninger.api.medl.MedlConsumer
 import no.nav.tms.personopplysninger.api.medl.MedlService
-import no.nav.tms.personopplysninger.api.medl.medl
+import no.nav.tms.personopplysninger.api.medl.medlRoutes
 import no.nav.tms.personopplysninger.api.kontoregister.KontoregisterConsumer
 import no.nav.tms.personopplysninger.api.kontoregister.kontoregisterRoutes
 import no.nav.tms.personopplysninger.api.personalia.pdl.PdlApiConsumer
@@ -79,7 +79,7 @@ fun main() {
 
     val userRoutes: Route.() -> Unit = {
         personalia(hentPersonaliaService, oppdaterPersonaliaService)
-        medl(medlService)
+        medlRoutes(medlService)
         institusjonRoutes(institusjonConsumer)
         kontaktinformasjonRoutes(kontaktinformasjonService)
         kontoregisterRoutes(kontoregisterConsumer)
