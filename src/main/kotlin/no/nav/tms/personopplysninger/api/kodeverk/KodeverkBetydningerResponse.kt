@@ -3,8 +3,9 @@ package no.nav.tms.personopplysninger.api.kodeverk
 import io.github.oshai.kotlinlogging.KotlinLogging
 import java.time.LocalDate
 
-class KodeverkBetydningerResponse {
+class KodeverkBetydningerResponse(
     val betydninger: Map<String, List<Betydning>> = emptyMap()
+) {
 
     fun tekst(key: String): String {
         return betydninger[key]?.first()?.tekst()

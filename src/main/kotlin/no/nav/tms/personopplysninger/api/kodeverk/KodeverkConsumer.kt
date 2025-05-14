@@ -19,10 +19,11 @@ class KodeverkConsumer(
     private val azureService: AzureService,
     private val kodeverkUrl: String,
     private val kodevekClientId: String,
+    cacheDuration: Duration = Duration.ofMinutes(45)
 ) {
     private val cache = Caffeine.newBuilder()
         .maximumSize(20)
-        .expireAfterWrite(Duration.ofMinutes(45))
+        .expireAfterWrite(cacheDuration)
         .build<Pair<String, Boolean>, KodeverkBetydningerResponse>()
 
     suspend fun hentRetningsnumre(): KodeverkBetydningerResponse {

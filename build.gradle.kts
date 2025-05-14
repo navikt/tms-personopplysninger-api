@@ -58,6 +58,7 @@ dependencies {
     implementation(TmsCommonLib.metrics)
     implementation(TmsKafkaTools.kafkaApplication)
     implementation(Prometheus.metricsCore)
+    implementation("io.ktor:ktor-client-android:3.1.2")
 
     testImplementation(JunitPlatform.launcher)
     testImplementation(JunitJupiter.api)

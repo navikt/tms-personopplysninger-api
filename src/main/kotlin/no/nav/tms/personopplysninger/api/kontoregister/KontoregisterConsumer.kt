@@ -22,11 +22,12 @@ class KontoregisterConsumer(
     private val client: HttpClient,
     private val kontoregisterUrl: String,
     private val tokenExchanger: TokenExchanger,
+    cacheDuration: Duration = Duration.ofMinutes(45)
 ) {
     private val log = KotlinLogging.logger { }
 
-    private val landkoder = SingletonCache<List<KontoResponse.Landkode>>(expireAfter = Duration.ofMinutes(45))
-    private val valutakoder = SingletonCache<List<KontoResponse.Valutakode>>(expireAfter = Duration.ofMinutes(45))
+    private val landkoder = SingletonCache<List<KontoResponse.Landkode>>(expireAfter = cacheDuration)
+    private val valutakoder = SingletonCache<List<KontoResponse.Valutakode>>(expireAfter = cacheDuration)
 
     suspend fun hentAktivKonto(user: UserPrincipal): Konto? {
         val accessToken = tokenExchanger.kontoregisterToken(user.accessToken)

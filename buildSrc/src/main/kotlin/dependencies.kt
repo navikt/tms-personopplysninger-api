@@ -1,4 +1,5 @@
 import default.DependencyGroup
+import default.KtorDefaults
 
 object Caffeine: DependencyGroup {
     override val groupId = "com.github.ben-manes.caffeine"
