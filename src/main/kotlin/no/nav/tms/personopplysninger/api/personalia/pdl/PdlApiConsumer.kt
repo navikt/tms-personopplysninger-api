@@ -38,12 +38,6 @@ class PdlApiConsumer(
             .let { executeQuery(it, user.accessToken) }
     }
 
-    suspend fun hentKontaktadresse(user: UserPrincipal): HentKontaktadresseQuery.Result {
-        return HentKontaktadresseQuery.Variables(ident = user.ident)
-            .let { HentKontaktadresseQuery(it) }
-            .let { executeQuery(it, user.accessToken) }
-    }
-
     suspend fun hentTelefon(user: UserPrincipal): HentTelefonQuery.Result {
         return HentTelefonQuery.Variables(ident = user.ident)
             .let { HentTelefonQuery(it) }
