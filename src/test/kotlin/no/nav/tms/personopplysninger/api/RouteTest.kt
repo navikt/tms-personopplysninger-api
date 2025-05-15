@@ -24,7 +24,9 @@ import java.text.DateFormat
 
 abstract class RouteTest {
 
-    val testIdent = "01234567890"
+    companion object {
+        const val testIdent = "01234567890"
+    }
 
     private val objectMapper = jacksonObjectMapper()
 

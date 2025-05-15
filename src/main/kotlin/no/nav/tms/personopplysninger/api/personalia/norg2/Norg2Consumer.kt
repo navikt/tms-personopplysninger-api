@@ -7,6 +7,7 @@ import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.statement.*
 import io.ktor.http.isSuccess
+import no.nav.tms.personopplysninger.api.common.ConsumerException
 import no.nav.tms.personopplysninger.api.common.HeaderHelper.addNavHeaders
 
 class Norg2Consumer(
@@ -37,14 +38,11 @@ class Norg2Consumer(
         val response: HttpResponse =
             client.get("$norg2Url/api/v2/enhet/$enhetsnr/kontaktinformasjon") {
                 addNavHeaders()
-                header("enhetsnr", enhetsnr)
             }
         return if (response.status.isSuccess()) {
             response.body()
         } else {
-            throw Norg2ConsumerException(response.request.url.toString(), response.status.value, response.bodyAsText())
+            throw ConsumerException.fromResponse("norg2", response)
         }
     }
 }
-
-class Norg2ConsumerException(val endpoint: String, val status: Int, message: String): RuntimeException()

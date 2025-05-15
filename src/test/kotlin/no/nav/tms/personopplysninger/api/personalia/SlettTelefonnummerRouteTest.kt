@@ -67,7 +67,7 @@ class SlettTelefonnummerRouteTest : RouteTest() {
 
         externalService(pdlApiUrl) {
             post("/graphql") {
-                call.respondText(PdlResponseBuilder.hentTelefonnummerResponse(
+                call.respondText(hentTelefonnummerResponse(
                     landskode = slettRequest.landskode,
                     nummer = slettRequest.nummer,
                     opplysningsId = opplysningsId
@@ -124,7 +124,7 @@ class SlettTelefonnummerRouteTest : RouteTest() {
             post("/graphql") {
                 apiHeaders = call.request.headers
 
-                call.respondText(PdlResponseBuilder.hentTelefonnummerResponse(
+                call.respondText(hentTelefonnummerResponse(
                     landskode = slettRequest.landskode,
                     nummer = slettRequest.nummer,
                     opplysningsId = "123"
@@ -183,7 +183,7 @@ class SlettTelefonnummerRouteTest : RouteTest() {
 
         externalService(pdlApiUrl) {
             post("/graphql") {
-                call.respondText(PdlResponseBuilder.hentTelefonnummerResponse(
+                call.respondText(hentTelefonnummerResponse(
                     landskode = slettRequest.landskode,
                     nummer = slettRequest.nummer,
                     opplysningsId = "123"
@@ -231,7 +231,7 @@ class SlettTelefonnummerRouteTest : RouteTest() {
 
         externalService(pdlApiUrl) {
             post("/graphql") {
-                call.respondText(PdlResponseBuilder.hentTelefonnummerResponse(
+                call.respondText(hentTelefonnummerResponse(
                     landskode = slettRequest.landskode,
                     nummer = slettRequest.nummer,
                     opplysningsId = "123"
@@ -279,7 +279,7 @@ class SlettTelefonnummerRouteTest : RouteTest() {
 
         externalService(pdlApiUrl) {
             post("/graphql") {
-                call.respondText(PdlResponseBuilder.hentTelefonnummerResponse(
+                call.respondText(hentTelefonnummerResponse(
                     landskode = slettRequest.landskode,
                     nummer = slettRequest.nummer,
                     opplysningsId = "123"
@@ -310,4 +310,26 @@ class SlettTelefonnummerRouteTest : RouteTest() {
             it["error"].isNull shouldBe true
         }
     }
+
+    private fun hentTelefonnummerResponse(
+        landskode: String,
+        nummer: String,
+        opplysningsId: String
+    ) = """
+{
+    "data": {
+        "person": {
+            "telefonnummer": [
+                {
+                    "landskode": "$landskode",
+                    "nummer": "$nummer",
+                    "metadata": {
+                        "opplysningsId": "$opplysningsId"
+                    }
+                }
+            ]
+        }
+    }
+}
+    """
 }

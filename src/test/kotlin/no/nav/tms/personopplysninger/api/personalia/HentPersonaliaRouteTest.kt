@@ -1,12 +1,13 @@
 package no.nav.tms.personopplysninger.api.personalia
 
-import com.fasterxml.jackson.databind.JsonNode
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.ktor.server.testing.*
 import io.mockk.coEvery
 import io.mockk.mockk
 import no.nav.tms.personopplysninger.api.RouteTest
@@ -15,12 +16,9 @@ import no.nav.tms.personopplysninger.api.common.HeaderHelper
 import no.nav.tms.personopplysninger.api.common.TokenExchanger
 import no.nav.tms.personopplysninger.api.kodeverk.KodeverkConsumer
 import no.nav.tms.personopplysninger.api.kontoregister.KontoregisterConsumer
+import no.nav.tms.personopplysninger.api.personalia.HentPersonaliaTestData.ExternalResponse
 import no.nav.tms.personopplysninger.api.personalia.norg2.Norg2Consumer
-import no.nav.tms.personopplysninger.api.personalia.norg2.Norg2Enhet
-import no.nav.tms.personopplysninger.api.personalia.pdl.EndringsType
 import no.nav.tms.personopplysninger.api.personalia.pdl.PdlApiConsumer
-import no.nav.tms.personopplysninger.api.personalia.pdl.PendingEndring
-import no.nav.tms.personopplysninger.api.personalia.pdl.Telefonnummer
 import no.nav.tms.personopplysninger.api.routeConfig
 import no.nav.tms.token.support.azure.exchange.AzureService
 import org.junit.jupiter.api.Test
@@ -65,337 +63,349 @@ class HentPersonaliaRouteTest : RouteTest() {
         }
     }
 
+    private fun ApplicationTestBuilder.setupDefaultExternalRoutes(
+        setupPdl: Boolean = true,
+        setupNorg2: Boolean = true,
+        setupKodeverk: Boolean = true,
+        setupKontoregister: Boolean = true
+    ) {
+        if (setupPdl) {
+            externalService(pdlApiUrl) {
+                post("/graphql") {
+                    call.respondText(ExternalResponse.pdlHentPerson, contentType = ContentType.Application.Json)
+                }
+            }
+        }
+
+        if (setupNorg2) {
+            externalService(norg2Url) {
+                get("/api/v1/enhet/navkontor/{geografiskId}") {
+                    if (call.pathParameters["geografiskId"] == HentPersonaliaTestData.geografiskTilknytning) {
+                        call.respondText(ExternalResponse.norg2Enhet, contentType = ContentType.Application.Json)
+                    } else {
+                        call.respond(HttpStatusCode.NotFound)
+                    }
+                }
+
+                get("/api/v2/enhet/{enhetNr}/kontaktinformasjon") {
+                    if (call.pathParameters["enhetNr"] == HentPersonaliaTestData.enhetsnummer) {
+                        call.respondText(ExternalResponse.norg2Kontaktinfo, contentType = ContentType.Application.Json)
+                    } else {
+                        call.respond(HttpStatusCode.NotFound)
+                    }
+                }
+            }
+        }
+
+        if (setupKontoregister) {
+            externalService(kontoregisterUrl) {
+                post("/api/borger/v1/hent-aktiv-konto") {
+                    call.respondText(ExternalResponse.kontoregisterKonto, contentType = ContentType.Application.Json)
+                }
+
+                get("/api/system/v1/hent-landkoder") {
+                    call.respondText(ExternalResponse.kontoregisterLandkoder, contentType = ContentType.Application.Json)
+                }
+
+                get("/api/system/v1/hent-valutakoder") {
+                    call.respondText(ExternalResponse.kontoregisterValutakoder, contentType = ContentType.Application.Json)
+                }
+            }
+        }
+
+        if (setupKodeverk) {
+            externalService(kodeverkUrl) {
+                get("/api/v1/kodeverk/Landkoder/koder/betydninger") {
+                    call.respondText(ExternalResponse.kodeverkLandkoder, contentType = ContentType.Application.Json)
+                }
+
+                get("/api/v1/kodeverk/Kommuner/koder/betydninger") {
+                    call.respondText(ExternalResponse.kodeverkKommuner, contentType = ContentType.Application.Json)
+                }
+
+                get("/api/v1/kodeverk/StatsborgerskapFreg/koder/betydninger") {
+                    call.respondText(ExternalResponse.kodeverkStatsborgerskap, contentType = ContentType.Application.Json)
+                }
+
+                get("/api/v1/kodeverk/Postnummer/koder/betydninger") {
+                    call.respondText(ExternalResponse.kodeverkPostnummer, contentType = ContentType.Application.Json)
+                }
+            }
+        }
+    }
+
     private val hentPersonaliaPath = "/personalia"
 
     @Test
     fun `henter personalia fra baktjenester`() = apiTest(internalRouteConfig) { client ->
 
+        setupDefaultExternalRoutes()
+
+        val response = client.get(hentPersonaliaPath)
+
+
+        response.status shouldBe HttpStatusCode.OK
+        val responseJson = response.json()
+
+        responseJson["personalia"].let { personalia ->
+
+            personalia["fornavn"].asText() shouldBe HentPersonaliaTestData.fornavn
+            personalia["etternavn"].asText() shouldBe HentPersonaliaTestData.etternavn
+
+            personalia["personident"]["verdi"].asText() shouldBe HentPersonaliaTestData.ident
+            personalia["personident"]["type"].asText() shouldBe HentPersonaliaTestData.identtype
+
+            personalia["kontoregisterStatus"].asText() shouldBe HentPersonaliaTestData.kontoregisterStatus
+            personalia["kontonr"].asTextOrNull() shouldBe null
+            personalia["utenlandskbank"]["adresse1"].asText() shouldBe HentPersonaliaTestData.bankAdresse1
+            personalia["utenlandskbank"]["adresse2"].asText() shouldBe HentPersonaliaTestData.bankAdresse2
+            personalia["utenlandskbank"]["adresse3"].asText() shouldBe HentPersonaliaTestData.bankAdresse3
+            personalia["utenlandskbank"]["bankkode"].asText() shouldBe HentPersonaliaTestData.bankkode
+            personalia["utenlandskbank"]["banknavn"].asText() shouldBe HentPersonaliaTestData.banknavn
+            personalia["utenlandskbank"]["kontonummer"].asText() shouldBe HentPersonaliaTestData.bankKontonummer
+            personalia["utenlandskbank"]["land"].asText() shouldBe HentPersonaliaTestData.bankLand
+            personalia["utenlandskbank"]["swiftkode"].asText() shouldBe HentPersonaliaTestData.bankSwiftkode
+            personalia["utenlandskbank"]["valuta"].asText() shouldBe HentPersonaliaTestData.bankValuta
+
+            personalia["tlfnr"]["telefonAlternativ"].asTextOrNull() shouldBe null
+            personalia["tlfnr"]["landskodeAlternativ"].asTextOrNull() shouldBe null
+            personalia["tlfnr"]["telefonHoved"].asText() shouldBe HentPersonaliaTestData.telefonnummer
+            personalia["tlfnr"]["landskodeHoved"].asText() shouldBe HentPersonaliaTestData.telefonlandskode
+
+            personalia["statsborgerskap"][0].asText() shouldBe HentPersonaliaTestData.statsborgerskap
+            personalia["foedested"].asText() shouldBe HentPersonaliaTestData.foedested
+            personalia["sivilstand"].asText() shouldBe HentPersonaliaTestData.sivilstand
+            personalia["kjoenn"].asText() shouldBe HentPersonaliaTestData.kjoenn
+        }
+
+        responseJson["adresser"].let { adresser ->
+
+            adresser["kontaktadresser"][0]["gyldigTilOgMed"].asTextOrNull() shouldBe null
+            adresser["kontaktadresser"][0]["coAdressenavn"].asTextOrNull() shouldBe null
+            adresser["kontaktadresser"][0]["kilde"].asText() shouldBe HentPersonaliaTestData.kontaktadresseKilde
+            adresser["kontaktadresser"][0]["adresse"]["adresselinje1"].asText() shouldBe HentPersonaliaTestData.kontaktadresseAdresselinje1
+            adresser["kontaktadresser"][0]["adresse"]["adresselinje2"].asText() shouldBe HentPersonaliaTestData.kontaktadresseAdresselinje2
+            adresser["kontaktadresser"][0]["adresse"]["adresselinje3"].asText() shouldBe HentPersonaliaTestData.kontaktadresseAdresselinje3
+            adresser["kontaktadresser"][0]["adresse"]["postnummer"].asTextOrNull() shouldBe null
+            adresser["kontaktadresser"][0]["adresse"]["poststed"].asTextOrNull() shouldBe null
+            adresser["kontaktadresser"][0]["adresse"]["type"].asText() shouldBe HentPersonaliaTestData.kontaktadresseType
+
+            adresser["bostedsadresse"]["angittFlyttedato"].asTextOrNull() shouldBe null
+            adresser["bostedsadresse"]["coAdressenavn"].asTextOrNull() shouldBe null
+            adresser["bostedsadresse"]["adresse"]["husnummer"].asText() shouldBe HentPersonaliaTestData.bostedsadresseHusnummer
+            adresser["bostedsadresse"]["adresse"]["husbokstav"].asTextOrNull() shouldBe null
+            adresser["bostedsadresse"]["adresse"]["bruksenhetsnummer"].asTextOrNull() shouldBe null
+            adresser["bostedsadresse"]["adresse"]["adressenavn"].asText() shouldBe HentPersonaliaTestData.bostedsadresseAdressenavn
+            adresser["bostedsadresse"]["adresse"]["kommune"].asText() shouldBe HentPersonaliaTestData.bostedsadresseKommune
+            adresser["bostedsadresse"]["adresse"]["tilleggsnavn"].asTextOrNull() shouldBe null
+            adresser["bostedsadresse"]["adresse"]["postnummer"].asText() shouldBe HentPersonaliaTestData.bostedsadressePostnummer
+            adresser["bostedsadresse"]["adresse"]["poststed"].asText() shouldBe HentPersonaliaTestData.bostedsadressePoststed
+            adresser["bostedsadresse"]["adresse"]["type"].asText() shouldBe HentPersonaliaTestData.bostedsadresseType
+
+            adresser["oppholdsadresser"].size() shouldBe 0
+            adresser["deltBosted"].asTextOrNull() shouldBe null
+        }
+    }
+
+    @Test
+    fun `bruker riktige headers mot pdl-api`() = apiTest(internalRouteConfig) {
+
+        setupDefaultExternalRoutes(setupPdl = false)
+
+        var headers: Headers? = null
+
         externalService(pdlApiUrl) {
             post("/graphql") {
-                call.respondText(personaliaResponse, contentType = ContentType.Application.Json)
+                headers = call.request.headers
+                call.respondText(ExternalResponse.pdlHentPerson, contentType = ContentType.Application.Json)
             }
         }
 
+        client.get(hentPersonaliaPath)
+
+        headers.shouldNotBeNull().let {
+            it[HttpHeaders.Authorization] shouldBe "Bearer $pdlApiToken"
+            it[HeaderHelper.CALL_ID_HEADER].shouldNotBeNull()
+            it[HeaderHelper.NAV_CONSUMER_ID_HEADER] shouldBe HeaderHelper.NAV_CONSUMER_ID
+            it["Behandlingsnummer"] shouldBe behandlingsnummer
+        }
+    }
+
+    @Test
+    fun `bruker riktige headers mot norg2`() = apiTest(internalRouteConfig) {
+
+        setupDefaultExternalRoutes(setupNorg2 = false)
+
+        var headersEnhet: Headers? = null
+        var headersKontaktinfo: Headers? = null
+
+
         externalService(norg2Url) {
             get("/api/v1/enhet/navkontor/{geografiskId}") {
-                if (call.pathParameters["geografiskId"] == "460108") {
-                    call.respondText(norg2EnhetResponse, contentType = ContentType.Application.Json)
+                if (call.pathParameters["geografiskId"] == HentPersonaliaTestData.geografiskTilknytning) {
+                    headersEnhet = call.request.headers
+                    call.respondText(ExternalResponse.norg2Enhet, contentType = ContentType.Application.Json)
                 } else {
                     call.respond(HttpStatusCode.NotFound)
                 }
             }
 
             get("/api/v2/enhet/{enhetNr}/kontaktinformasjon") {
-                if (call.pathParameters["enhetNr"] == "0101") {
-                    call.respondText(norg2KontaktinfoResponse, contentType = ContentType.Application.Json)
+                if (call.pathParameters["enhetNr"] == HentPersonaliaTestData.enhetsnummer) {
+                    headersKontaktinfo = call.request.headers
+                    call.respondText(ExternalResponse.norg2Kontaktinfo, contentType = ContentType.Application.Json)
                 } else {
                     call.respond(HttpStatusCode.NotFound)
                 }
             }
         }
 
-        externalService()
+        client.get(hentPersonaliaPath)
 
-        val response = client.post {
-            url(slettTelefonnummerPath)
-            contentType(ContentType.Application.Json)
-            setBody(slettRequest)
+        headersEnhet.shouldNotBeNull().let {
+            it[HttpHeaders.Authorization].shouldBeNull()
+            it[HeaderHelper.CALL_ID_HEADER].shouldNotBeNull()
+            it[HeaderHelper.NAV_CONSUMER_ID_HEADER] shouldBe HeaderHelper.NAV_CONSUMER_ID
         }
 
-        response.status shouldBe HttpStatusCode.OK
-        response.json().let {
-            it["statusType"].asText() shouldBe "OK"
-            it["error"].isNull shouldBe true
+        headersKontaktinfo.shouldNotBeNull().let {
+            it[HttpHeaders.Authorization].shouldBeNull()
+            it[HeaderHelper.CALL_ID_HEADER].shouldNotBeNull()
+            it[HeaderHelper.NAV_CONSUMER_ID_HEADER] shouldBe HeaderHelper.NAV_CONSUMER_ID
         }
+    }
 
-        val endringPayload = capturedPayload.shouldNotBeNull()
+    @Test
+    fun `bruker riktige headers mot kontoregister`() = apiTest(internalRouteConfig) {
 
-        endringPayload["personopplysninger"]
-            .first()
-            .let {
-                it["ident"].asText() shouldBe testIdent
-                it["opplysningstype"].asText() shouldBe "TELEFONNUMMER"
-                it["endringstype"].asText() shouldBe EndringsType.OPPHOER.name
-                it["opplysningsId"].asText() shouldBe opplysningsId
+        setupDefaultExternalRoutes(setupKontoregister = false)
 
-                val melding = it["endringsmelding"]
-                melding["@type"].asText() shouldBe "OPPHOER"
+        var headersAktivKonto: Headers? = null
+        var headersLandkoder: Headers? = null
+        var headersValutakoder: Headers? = null
+
+        externalService(kontoregisterUrl) {
+            post("/api/borger/v1/hent-aktiv-konto") {
+                headersAktivKonto = call.request.headers
+                call.respondText(ExternalResponse.kontoregisterKonto, contentType = ContentType.Application.Json)
             }
+
+            get("/api/system/v1/hent-landkoder") {
+                headersLandkoder = call.request.headers
+                call.respondText(ExternalResponse.kontoregisterLandkoder, contentType = ContentType.Application.Json)
+            }
+
+            get("/api/system/v1/hent-valutakoder") {
+                headersValutakoder = call.request.headers
+                call.respondText(ExternalResponse.kontoregisterValutakoder, contentType = ContentType.Application.Json)
+            }
+        }
+
+        client.get(hentPersonaliaPath)
+
+        headersAktivKonto.shouldNotBeNull().let {
+            it[HttpHeaders.Authorization] shouldBe "Bearer $kontoregisterToken"
+            it[HeaderHelper.CALL_ID_HEADER].shouldNotBeNull()
+            it[HeaderHelper.NAV_CONSUMER_ID_HEADER] shouldBe HeaderHelper.NAV_CONSUMER_ID
+        }
+
+        headersLandkoder.shouldNotBeNull().let {
+            it[HttpHeaders.Authorization].shouldBeNull()
+            it[HeaderHelper.CALL_ID_HEADER].shouldBeNull()
+            it[HeaderHelper.NAV_CONSUMER_ID_HEADER].shouldBeNull()
+        }
+
+        headersValutakoder.shouldNotBeNull().let {
+            it[HttpHeaders.Authorization].shouldBeNull()
+            it[HeaderHelper.CALL_ID_HEADER].shouldBeNull()
+            it[HeaderHelper.NAV_CONSUMER_ID_HEADER].shouldBeNull()
+        }
     }
 
-    private val personaliaResponse = """
-{
-  "data": {
-    "person": {
-      "navn": [
-        {
-          "fornavn": "TEST",
-          "mellomnavn": "TESTER",
-          "etternavn": "TESTEST"
+    @Test
+    fun `bruker riktige headers mot kodeverk`() = apiTest(internalRouteConfig) {
+
+        setupDefaultExternalRoutes(setupKontoregister = false)
+
+        var headersLandkoder: Headers? = null
+        var headersKommuner: Headers? = null
+        var headersStatsborgerskapFreg: Headers? = null
+        var headersPostnummer: Headers? = null
+
+        externalService(kodeverkUrl) {
+            get("/api/v1/kodeverk/Landkoder/koder/betydninger") {
+                headersLandkoder = call.request.headers
+                call.respondText(ExternalResponse.kodeverkLandkoder, contentType = ContentType.Application.Json)
+            }
+
+            get("/api/v1/kodeverk/Kommuner/koder/betydninger") {
+                headersKommuner = call.request.headers
+                call.respondText(ExternalResponse.kodeverkKommuner, contentType = ContentType.Application.Json)
+            }
+
+            get("/api/v1/kodeverk/StatsborgerskapFreg/koder/betydninger") {
+                headersStatsborgerskapFreg = call.request.headers
+                call.respondText(ExternalResponse.kodeverkStatsborgerskap, contentType = ContentType.Application.Json)
+            }
+
+            get("/api/v1/kodeverk/Postnummer/koder/betydninger") {
+                headersPostnummer = call.request.headers
+                call.respondText(ExternalResponse.kodeverkPostnummer, contentType = ContentType.Application.Json)
+            }
         }
-      ],
-      "telefonnummer": [
-        {
-          "landskode": "+47",
-          "nummer": "12345678",
-          "prioritet": 1,
-          "metadata": {
-            "opplysningsId": "123"
-          }
+
+        client.get(hentPersonaliaPath)
+
+        headersLandkoder.shouldNotBeNull().let {
+            it[HttpHeaders.Authorization] shouldBe "Bearer $kodeverkToken"
+            it[HeaderHelper.CALL_ID_HEADER].shouldNotBeNull()
+            it[HeaderHelper.NAV_CONSUMER_ID_HEADER] shouldBe HeaderHelper.NAV_CONSUMER_ID
         }
-      ],
-      "folkeregisteridentifikator": [
-        {
-          "identifikasjonsnummer": "$testIdent",
-          "type": "FNR"
+
+        headersKommuner.shouldNotBeNull().let {
+            it[HttpHeaders.Authorization] shouldBe "Bearer $kodeverkToken"
+            it[HeaderHelper.CALL_ID_HEADER].shouldNotBeNull()
+            it[HeaderHelper.NAV_CONSUMER_ID_HEADER] shouldBe HeaderHelper.NAV_CONSUMER_ID
         }
-      ],
-      "statsborgerskap": [
-        {
-          "land": "NOR"
-        },
-        {
-          "land": "SYR",
-          "gyldigTilOgMed": "2020-02-28"
+
+        headersStatsborgerskapFreg.shouldNotBeNull().let {
+            it[HttpHeaders.Authorization] shouldBe "Bearer $kodeverkToken"
+            it[HeaderHelper.CALL_ID_HEADER].shouldNotBeNull()
+            it[HeaderHelper.NAV_CONSUMER_ID_HEADER] shouldBe HeaderHelper.NAV_CONSUMER_ID
         }
-      ],
-      "foedested": [
-        {
-          "foedekommune": "4601",
-          "foedeland": "NOR"
+
+        headersPostnummer.shouldNotBeNull().let {
+            it[HttpHeaders.Authorization] shouldBe "Bearer $kodeverkToken"
+            it[HeaderHelper.CALL_ID_HEADER].shouldNotBeNull()
+            it[HeaderHelper.NAV_CONSUMER_ID_HEADER] shouldBe HeaderHelper.NAV_CONSUMER_ID
         }
-      ],
-      "sivilstand": [
-        {
-          "type": "UGIFT",
-          "gyldigFraOgMed": "2000-01-01"
-        },
-        {
-          "type": "GIFT",
-          "gyldigFraOgMed": "2020-01-01"
-        }
-      ],
-      "kjoenn": [
-        {
-          "kjoenn": "MANN"
-        }
-      ],
-      "bostedsadresse": [
-        {
-          "angittFlyttedato": null,
-          "gyldigFraOgMed": "2020-01-01T12:00:00",
-          "gyldigTilOgMed": null,
-          "coAdressenavn": null,
-          "vegadresse": {
-            "husnummer": "100",
-            "husbokstav": null,
-            "bruksenhetsnummer": null,
-            "adressenavn": "Almåsvegen",
-            "kommunenummer": "4601",
-            "bydelsnummer": null,
-            "tilleggsnavn": null,
-            "postnummer": "5109"
-          },
-          "matrikkeladresse": null,
-          "utenlandskAdresse": null,
-          "ukjentBosted": null,
-          "metadata": {
-            "opplysningsId": "456",
-            "master": "Freg"
-          }
-        }
-      ],
-      "deltBosted": [],
-      "kontaktadresse": [
-        {
-          "gyldigFraOgMed": "2020-03-24T00:00",
-          "gyldigTilOgMed": null,
-          "type": "Innland",
-          "coAdressenavn": null,
-          "postboksadresse": null,
-          "vegadresse": null,
-          "postadresseIFrittFormat": {
-            "adresselinje1": "Hylkjelia",
-            "adresselinje2": "5109 HYLKJE",
-            "adresselinje3": "Norge",
-            "postnummer": null
-          },
-          "utenlandskAdresse": null,
-          "utenlandskAdresseIFrittFormat": null,
-          "folkeregistermetadata": {
-            "ajourholdstidspunkt": null,
-            "gyldighetstidspunkt": "2020-03-24T00:00",
-            "opphoerstidspunkt": null,
-            "kilde": "KILDE_DSF",
-            "aarsak": null,
-            "sekvens": null
-          },
-          "metadata": {
-            "opplysningsId": "789",
-            "master": "pdl"
-          }
-        }
-      ],
-      "oppholdsadresse": []
-    },
-    "geografiskTilknytning": {
-      "gtKommune": null,
-      "gtBydel": "460108"
     }
-  }
-}
-"""
 
-    private val norg2EnhetResponse = """
-{
-    "enhetNr": "0101"
-}
-"""
+    @Test
+    fun `feiler hvis pdl er nede`() = apiTest(internalRouteConfig) {
+        setupDefaultExternalRoutes(setupPdl = false)
 
-    private val norg2KontaktinfoResponse = """
-{
-  "enhetNr": "0101",
-  "navn": "NAV Halden-Aremark",
-  "telefonnummer": "55553333",
-  "telefonnummerKommentar": null,
-  "epost": null,
-  "postadresse": {
-    "type": "postboksadresse",
-    "postnummer": "1751",
-    "poststed": "HALDEN",
-    "postboksnummer": "56",
-    "postboksanlegg": null
-  },
-  "besoeksadresse": {
-    "type": "stedsadresse",
-    "postnummer": "1771",
-    "poststed": "HALDEN",
-    "gatenavn": "Storgata",
-    "husnummer": "8",
-    "husbokstav": null,
-    "adresseTilleggsnavn": null
-  },
-  "spesielleOpplysninger": "NAV Halden - Aremark har digital drop-in og er tilgjengelig via NAV sitt telefonnummer. Vi har samtaler ved fremmøte der det er behov for det og samhandler med våre innbyggere på de arenaer som er hensiktsmessige.\n\nFor deg som har mulighet, fortsett å benytt deg av våre tjenester på www.nav.no, «Skriv til oss» på Ditt NAV eller dialogen i aktivitetsplan. Alle våre veiledere er tilgjengelige på digitale løsninger.\n\nDersom du er i en akutt situasjon, f.eks. uten bolig, mat eller livsviktige medisiner, send inn digital søknad og merk denne «Nødhjelp».  Kan du ikke søke digitalt, kontakt oss på telefon. Halden kommunes servicesenter kan i nødtilfeller låne deg telefon, dersom du ikke disponerer det.",
-  "brukerkontakt": {
-    "publikumsmottak": [
-      {
-        "besoeksadresse": {
-          "type": "stedsadresse",
-          "postnummer": "1771",
-          "poststed": "HALDEN",
-          "gatenavn": "Storgata",
-          "husnummer": "8",
-          "husbokstav": null,
-          "adresseTilleggsnavn": null
-        },
-        "aapningstider": [
-          {
-            "dag": null,
-            "dato": "2023-03-31",
-            "fra": null,
-            "til": null,
-            "kommentar": "Steng fordi Bjørnar er i Granca",
-            "stengt": true,
-            "kunTimeavtale": false
-          }
-        ],
-        "stedsbeskrivelse": "Halden",
-        "adkomstbeskrivelse": null
-      },
-      {
-        "besoeksadresse": {
-          "type": "stedsadresse",
-          "postnummer": "1798",
-          "poststed": "AREMARK",
-          "gatenavn": "Aremarkveien",
-          "husnummer": "2276",
-          "husbokstav": null,
-          "adresseTilleggsnavn": null
-        },
-        "aapningstider": [
-          {
-            "dag": "Mandag",
-            "dato": null,
-            "fra": null,
-            "til": null,
-            "kommentar": null,
-            "stengt": false,
-            "kunTimeavtale": false
-          },
-          {
-            "dag": "Fredag",
-            "dato": null,
-            "fra": null,
-            "til": null,
-            "kommentar": "Timeavtaler i tidsrommet 09.00 - 15.00.",
-            "stengt": true,
-            "kunTimeavtale": false
-          }
-        ],
-        "stedsbeskrivelse": "Aremark",
-        "adkomstbeskrivelse": null
-      }
-    ]
-  }
-}
-"""
+        client.get(hentPersonaliaPath).status shouldBe HttpStatusCode.InternalServerError
+    }
 
-    private val kontoregisterResponse = """
-{
-  "kontonummer": "0000111122223333",
-  "utenlandskKontoInfo": {
-    "banknavn": "Banken Bank",
-    "bankkode": "CC000000000",
-    "bankLandkode": "SE",
-    "valutakode": "SEK",
-    "swiftBicKode": "SWEDEN00",
-    "bankadresse1": "Bankveien 2",
-    "bankadresse2": "0000 Bankstad",
-    "bankadresse3": "Sverige"
-  }
-}
-"""
+    @Test
+    fun `feiler hvis norg2 er nede`() = apiTest(internalRouteConfig) {
+        setupDefaultExternalRoutes(setupNorg2 = false)
 
-    private val kodeverkKommunerResponse = """
-{
-  "betydninger": {
-    "4601": [
-      {
-        "gyldigFra": "2019-12-27",
-        "gyldigTil": "9999-12-31",
-        "beskrivelser": {
-          "nb": {
-            "term": "Indre Østfold",
-            "tekst": "Indre Østfold"
-          }
-        }
-      }
-    ],
-    "5434": [
-      {
-        "gyldigFra": "2019-12-27",
-        "gyldigTil": "9999-12-31",
-        "beskrivelser": {
-          "nb": {
-            "term": "Måsøy",
-            "tekst": "Måsøy"
-          }
-        }
-      }
-    ],
-    "5435": [
-      {
-        "gyldigFra": "2019-12-27",
-        "gyldigTil": "9999-12-31",
-        "beskrivelser": {
-          "nb": {
-            "term": "Nordkapp",
-            "tekst": "Nordkapp"
-          }
-        }
-      }
-    ]
-  }
-}
-"""
+        client.get(hentPersonaliaPath).status shouldBe HttpStatusCode.InternalServerError
+    }
+
+    @Test
+    fun `goddtar at kontoregister er nede`() = apiTest(internalRouteConfig) {
+        setupDefaultExternalRoutes(setupKontoregister = false)
+
+        client.get(hentPersonaliaPath).status shouldBe HttpStatusCode.OK
+    }
+
+    @Test
+    fun `feiler hvis kodeverk er nede`() = apiTest(internalRouteConfig) {
+        setupDefaultExternalRoutes(setupKodeverk = false)
+
+        client.get(hentPersonaliaPath).status shouldBe HttpStatusCode.InternalServerError
+    }
 }

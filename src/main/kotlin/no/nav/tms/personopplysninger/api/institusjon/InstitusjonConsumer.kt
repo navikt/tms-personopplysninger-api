@@ -35,5 +35,3 @@ class InstitusjonConsumer(
 }
 
 private class InstitusjonRequest(val personident: String)
-
-class InstitusjonConsumerException(val endpoint: String, val status: Int, message: String): RuntimeException()
