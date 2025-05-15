@@ -13,7 +13,6 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import no.nav.pdl.generated.dto.HentKontaktadresseQuery
 import no.nav.pdl.generated.dto.HentPersonQuery
 import no.nav.pdl.generated.dto.HentTelefonQuery
 import no.nav.tms.personopplysninger.api.UserPrincipal
