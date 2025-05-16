@@ -37,13 +37,15 @@ class KontoregisterConsumer(
         val request = HentAktivKonto(user.ident)
 
         try {
-            val response: HttpResponse =
+            val response = metrics.measureRequest("aktiv_konto") {
                 client.post("$kontoregisterUrl/api/borger/v1/hent-aktiv-konto") {
                     addNavHeaders()
                     authorization(accessToken)
                     contentType(ContentType.Application.Json)
                     setBody(request)
                 }
+            }
+
             return if (response.status.isSuccess()) {
                 response.body()
             } else if (response.status == HttpStatusCode.NotFound) {
