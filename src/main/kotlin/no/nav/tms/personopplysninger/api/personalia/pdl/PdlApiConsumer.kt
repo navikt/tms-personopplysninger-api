@@ -11,11 +11,10 @@ import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import no.nav.pdl.generated.dto.HentPersonQuery
 import no.nav.pdl.generated.dto.HentTelefonQuery
 import no.nav.tms.personopplysninger.api.UserPrincipal
+import no.nav.tms.personopplysninger.api.common.ConsumerMetrics
 import no.nav.tms.personopplysninger.api.common.HeaderHelper.addNavHeaders
 import no.nav.tms.personopplysninger.api.common.HeaderHelper.authorization
 import no.nav.tms.personopplysninger.api.common.TokenExchanger
@@ -30,6 +29,8 @@ class PdlApiConsumer(
 
     private val log = KotlinLogging.logger {}
     private val secureLog = KotlinLogging.logger("secureLog")
+
+    private val metrics = ConsumerMetrics.init { }
 
     suspend fun hentPerson(user: UserPrincipal): HentPersonQuery.Result {
         return HentPersonQuery.Variables(ident = user.ident)
@@ -58,8 +59,8 @@ class PdlApiConsumer(
             ?: throw RuntimeException("Ingen data i resultatet fra SAF.")
     }
 
-    private suspend fun <T : Any> sendQuery(request: GraphQLClientRequest<T>, accessToken: String): HttpResponse =
-        withContext(Dispatchers.IO) {
+    private suspend fun <T : Any> sendQuery(request: GraphQLClientRequest<T>, accessToken: String): HttpResponse {
+        return metrics.measureRequest(requestName(request)) {
 
             val callId = UUID.randomUUID()
             log.info { "Sender graphql-spørring med callId=$callId" }
@@ -82,6 +83,7 @@ class PdlApiConsumer(
                 }
             }
         }
+    }
 
     private suspend inline fun <reified T: Any> parseBody(response: HttpResponse): GraphQLResponse<T> = try {
         response.body<GraphQLResponse<T>>()
@@ -98,6 +100,13 @@ class PdlApiConsumer(
         throw RuntimeException("Klarte ikke tolke respons fra PFL", e)
     }
 
+    private fun requestName(request: GraphQLClientRequest<*>): String {
+        return when(request) {
+            is HentPersonQuery -> "hent_person"
+            is HentTelefonQuery -> "hent_telefon"
+            else -> "ukjent"
+        }
+    }
 
     private fun GraphQLResponse<*>.containsData() = data != null
     private fun GraphQLResponse<*>.containsErrors() = errors?.isNotEmpty() == true

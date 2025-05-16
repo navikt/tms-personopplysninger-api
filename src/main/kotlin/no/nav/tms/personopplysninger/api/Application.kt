@@ -9,7 +9,7 @@ import no.nav.tms.personopplysninger.api.institusjon.InstitusjonConsumer
 import no.nav.tms.personopplysninger.api.institusjon.institusjonRoutes
 import no.nav.tms.personopplysninger.api.kodeverk.KodeverkConsumer
 import no.nav.tms.personopplysninger.api.kodeverk.kodeverkRoutes
-import no.nav.tms.personopplysninger.api.kontaktinformasjon.KontaktinfoConsumer
+import no.nav.tms.personopplysninger.api.kontaktinformasjon.KontaktinformasjonConsumer
 import no.nav.tms.personopplysninger.api.kontaktinformasjon.KontaktinformasjonService
 import no.nav.tms.personopplysninger.api.kontaktinformasjon.kontaktinformasjonRoutes
 import no.nav.tms.personopplysninger.api.medl.MedlConsumer
@@ -73,7 +73,7 @@ fun main() {
     )
 
     val kontaktinformasjonService = KontaktinformasjonService(
-        kontaktinfoConsumer = KontaktinfoConsumer(httpClient, environment.digdirKrrProxyUrl, tokenExchanger),
+        kontaktinfoConsumer = KontaktinformasjonConsumer(httpClient, environment.digdirKrrProxyUrl, tokenExchanger),
         kodeverkConsumer = kodeverkConsumer
     )
 

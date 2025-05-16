@@ -12,6 +12,7 @@ import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.*
 import no.nav.tms.personopplysninger.api.UserPrincipal
+import no.nav.tms.personopplysninger.api.common.ConsumerMetrics
 import no.nav.tms.personopplysninger.api.common.SingletonCache
 import no.nav.tms.personopplysninger.api.common.HeaderHelper.addNavHeaders
 import no.nav.tms.personopplysninger.api.common.HeaderHelper.authorization
@@ -28,6 +29,8 @@ class KontoregisterConsumer(
 
     private val landkoder = SingletonCache<List<KontoResponse.Landkode>>(expireAfter = cacheDuration)
     private val valutakoder = SingletonCache<List<KontoResponse.Valutakode>>(expireAfter = cacheDuration)
+
+    private val metrics = ConsumerMetrics.init { }
 
     suspend fun hentAktivKonto(user: UserPrincipal): Konto? {
         val accessToken = tokenExchanger.kontoregisterToken(user.accessToken)
@@ -64,13 +67,17 @@ class KontoregisterConsumer(
 
     suspend fun hentLandkoder(): List<KontoResponse.Landkode> {
         return landkoder.get {
-            client.get("$kontoregisterUrl/api/system/v1/hent-landkoder").body()
+            metrics.measureRequest("landkoder") {
+                client.get("$kontoregisterUrl/api/system/v1/hent-landkoder").body()
+            }
         }
     }
 
     suspend fun hentValutakoder(): List<KontoResponse.Valutakode> {
         return valutakoder.get {
-            client.get("$kontoregisterUrl/api/system/v1/hent-valutakoder").body()
+            metrics.measureRequest("valutakoder") {
+                client.get("$kontoregisterUrl/api/system/v1/hent-valutakoder").body()
+            }
         }
     }
 }

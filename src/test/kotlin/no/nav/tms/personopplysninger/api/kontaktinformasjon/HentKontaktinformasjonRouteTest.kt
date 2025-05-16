@@ -38,7 +38,7 @@ class HentKontaktinformasjonRouteTest : RouteTest() {
         routeConfig {
             kontaktinformasjonRoutes(
                 KontaktinformasjonService(
-                    KontaktinfoConsumer(client, krrProxyUrl, tokenExchanger),
+                    KontaktinformasjonConsumer(client, krrProxyUrl, tokenExchanger),
                     KodeverkConsumer(client, azureService, kodeverkUrl, kodeverkClientId)
                 )
             )

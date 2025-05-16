@@ -1,5 +1,6 @@
 package no.nav.tms.personopplysninger.api.personalia.pdl
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.tms.personopplysninger.api.personalia.TelefonnummerEndring
 

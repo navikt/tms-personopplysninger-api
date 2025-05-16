@@ -4,7 +4,7 @@ import no.nav.tms.personopplysninger.api.UserPrincipal
 import no.nav.tms.personopplysninger.api.kodeverk.KodeverkConsumer
 
 class KontaktinformasjonService(
-    private val kontaktinfoConsumer: KontaktinfoConsumer,
+    private val kontaktinfoConsumer: KontaktinformasjonConsumer,
     private val kodeverkConsumer: KodeverkConsumer,
 ) {
     suspend fun hentKontaktinformasjon(user: UserPrincipal): Kontaktinformasjon {

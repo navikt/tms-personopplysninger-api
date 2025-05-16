@@ -9,6 +9,7 @@ import io.ktor.http.*
 import kotlinx.coroutines.delay
 import no.nav.tms.personopplysninger.api.UserPrincipal
 import no.nav.tms.personopplysninger.api.common.ConsumerException
+import no.nav.tms.personopplysninger.api.common.ConsumerMetrics
 import no.nav.tms.personopplysninger.api.common.HeaderHelper.addNavHeaders
 import no.nav.tms.personopplysninger.api.common.HeaderHelper.authorization
 import no.nav.tms.personopplysninger.api.common.TokenExchanger
@@ -27,6 +28,8 @@ class PdlMottakConsumer(
 ) {
     private val log = KotlinLogging.logger {}
 
+    private val metrics = ConsumerMetrics.init { }
+
     suspend fun endreTelefonnummer(user: UserPrincipal, telefonnummer: TelefonnummerEndring): EndringResult {
         val payload = endreTelefonnummerPayload(user.ident, telefonnummer)
         return sendPdlEndring(user, payload)
@@ -40,7 +43,7 @@ class PdlMottakConsumer(
     private suspend fun sendPdlEndring(user: UserPrincipal, payload: OppdaterTelefonnummer): EndringResult {
         val exchangedToken = tokenExchanger.pdlMottakToken(user.accessToken)
 
-        val response =
+        val response = metrics.measureRequest(requestName(payload)) {
             client.post {
                 url("$pdlMottakUrl/api/v1/endringer")
                 authorization(exchangedToken)
@@ -48,6 +51,7 @@ class PdlMottakConsumer(
                 contentType(ContentType.Application.Json)
                 setBody(PersonEndring(payload))
             }
+        }
 
         return try {
             readResponseAndPollStatus(exchangedToken, response)
@@ -110,6 +114,13 @@ class PdlMottakConsumer(
             } else {
                 EndringResult.withError(pendingEndring)
             }
+        }
+    }
+
+    private fun requestName(oppdaterTelefonnummer: OppdaterTelefonnummer): String {
+        return when(oppdaterTelefonnummer.endringstype) {
+            EndringsType.OPPHOER -> "slett_telefon"
+            EndringsType.OPPRETT -> "oppdater_telefon"
         }
     }
 
