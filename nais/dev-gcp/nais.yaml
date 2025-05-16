@@ -34,14 +34,20 @@ spec:
   accessPolicy:
     outbound:
       external:
-        - host: kodeverk-api.intern.dev.nav.no
-        - host: norg2.dev-fss-pub.nais.io
-        - host: digdir-krr-proxy.intern.dev.nav.no
         - host: pdl-mottak.dev-fss-pub.nais.io
         - host: pdl-api.dev-fss-pub.nais.io
         - host: institusjon-opphold-proxy-q2.dev-fss-pub.nais.io
-        - host: medlemskap-medl-api.dev-fss-pub.nais.io
-        - host: sokos-kontoregister-person.intern.dev.nav.no
+      rules:
+        - application: "digdir-krr-proxy"
+          namespace: "team-rocket"
+        - application: "kodeverk-api"
+          namespace: "team-rocket"
+        - application: "medlemskap-medl-api"
+          namespace: "team-rocket"
+        - application: "sokos-kontoregister-person"
+          namespace: "okonomi"
+        - application: "norg2"
+          namespace: "org"
   secureLogs:
     enabled: true
   resources:
@@ -54,25 +60,25 @@ spec:
     - name: DIGDIR_KRR_PROXY_CONSUMER_CLIENT_ID
       value: dev-gcp:team-rocket:digdir-krr-proxy
     - name: DIGDIR_KRR_PROXY_URL
-      value: https://digdir-krr-proxy.intern.dev.nav.no
+      value: http://digdir-krr-proxy.team-rocket
     - name: INST2_API_URL
       value: https://inst2-q2.dev-fss-pub.nais.io
     - name: INST2_CLIENT_ID
       value: dev-fss:team-rocket:inst2-q2
     - name: KODEVERK_REST_API_URL
-      value: https://kodeverk-api.intern.dev.nav.no
+      value: http://kodeverk-api.team-rocket
     - name: KODEVERK_CLIENT_ID
       value: dev-gcp.team-rocket.kodeverk-api
     - name: KONTOREGISTER_CLIENT_ID
       value: dev-gcp:okonomi:sokos-kontoregister-person
     - name: KONTOREGISTER_URL
-      value: https://sokos-kontoregister-person.intern.dev.nav.no
+      value: http://sokos-kontoregister-person.okonomi
     - name: MEDL_CLIENT_ID
-      value: dev-fss:team-rocket:medlemskap-medl-api
+      value: dev-gcp:team-rocket:medlemskap-medl-api
     - name: MEDLEMSKAP_MEDL_API_URL
-      value: https://medlemskap-medl-api.dev-fss-pub.nais.io
+      value: http://medlemskap-medl-api.team-rocket
     - name: NORG2_API_URL
-      value: https://norg2.dev-fss-pub.nais.io/norg2
+      value: http://norg2.org
     - name: PDL_API_URL
       value: https://pdl-api.dev-fss-pub.nais.io
     - name: PDL_CONSUMER_CLIENT_ID

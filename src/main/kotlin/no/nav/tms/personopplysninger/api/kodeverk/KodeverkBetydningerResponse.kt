@@ -8,16 +8,22 @@ class KodeverkBetydningerResponse(
 ) {
 
     fun tekst(key: String): String {
-        return betydninger[key]?.first()?.tekst()
-            ?: key.also {
+        return betydninger[key]
+            ?.first()
+            ?.tekst()
+            ?: run {
                 log.warn { "Feil ved utledning av kodeverkstekst for $key" }
+                key
             }
     }
 
     fun term(key: String): String {
-        return betydninger[key]?.first()?.term()
-            ?: key.also {
-                log.warn { "Feil ved utledning av kodeverksterm for $key" }
+        return betydninger[key]
+            ?.first()
+            ?.term()
+            ?: run {
+                log.warn { "Feil ved utledning av kodeverkstekst for $key" }
+                key
             }
     }
 
@@ -31,12 +37,12 @@ data class Betydning(
     val gyldigTil: LocalDate,
     val beskrivelser: Map<String, Beskrivelse>
 ) {
-    fun tekst(lang: String = NORSK_BOKMAAL): String? {
-        return beskrivelser[lang]?.tekst
+    fun tekst(): String? {
+        return beskrivelser[NORSK_BOKMAAL]?.tekst
     }
 
-    fun term(lang: String = NORSK_BOKMAAL): String? {
-        return beskrivelser[lang]?.term
+    fun term(): String? {
+        return beskrivelser[NORSK_BOKMAAL]?.term
     }
 
     companion object {

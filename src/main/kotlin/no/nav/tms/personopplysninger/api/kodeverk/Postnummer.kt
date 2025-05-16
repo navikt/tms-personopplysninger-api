@@ -7,10 +7,10 @@ data class Postnummer(
     companion object {
         fun mapKodeverkResponse(response: KodeverkBetydningerResponse): List<Postnummer> {
             return response.betydninger
-                .map { (key, value) ->
+                .map { (kode, betydninger) ->
                     Postnummer(
-                        kode = key,
-                        tekst = value.first().tekst()
+                        kode = kode,
+                        tekst = betydninger.first().tekst()
                     )
                 }.sortedBy { it.tekst }
         }
