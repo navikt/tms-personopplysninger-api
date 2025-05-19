@@ -42,7 +42,7 @@ class Norg2Consumer(
     suspend fun hentKontaktinfo(enhetsnr: String): Norg2EnhetKontaktinfo {
 
         val response = metrics.measureRequest("kontaktinformasjon") {
-            client.get("$norg2Url/api/v2/enhet/$enhetsnr/kontaktinformasjon") {
+            client.get("$norg2Url/norg2/api/v2/enhet/$enhetsnr/kontaktinformasjon") {
                 addNavHeaders()
             }
         }
