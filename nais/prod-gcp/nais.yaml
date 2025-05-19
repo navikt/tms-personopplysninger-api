@@ -52,7 +52,7 @@ spec:
     - name: DIGDIR_KRR_PROXY_URL
       value: http://digdir-krr-proxy.team-rocket
     - name: INST2_API_URL
-      value: https://inst2.prod-fss-pub.nais.io/api
+      value: https://inst2.prod-fss-pub.nais.io
     - name: INST2_CLIENT_ID
       value: prod-fss:team-rocket:inst2
     - name: KODEVERK_REST_API_URL
@@ -70,7 +70,7 @@ spec:
     - name: NORG2_API_URL
       value: http://norg2.org
     - name: PDL_API_URL
-      value: https://pdl-api.prod-fss-pub.nais.io/graphql
+      value: https://pdl-api.prod-fss-pub.nais.io
     - name: PDL_CONSUMER_CLIENT_ID
       value: prod-fss:pdl:pdl-api
     - name: PDL_MOTTAK_API_URL
