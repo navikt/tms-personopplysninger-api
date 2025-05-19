@@ -23,7 +23,7 @@ class Norg2Consumer(
     suspend fun hentEnhet(geografisk: String): Norg2Enhet? {
 
         val response = metrics.measureRequest("enhet") {
-            client.get("$norg2Url/api/v1/enhet/navkontor/$geografisk") {
+            client.get("$norg2Url/norg2/api/v1/enhet/navkontor/$geografisk") {
                 addNavHeaders()
             }
         }
