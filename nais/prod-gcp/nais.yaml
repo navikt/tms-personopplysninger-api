@@ -38,6 +38,15 @@ spec:
         - host: pdl-api.prod-fss-pub.nais.io
         - host: institusjon-opphold-proxy.prod-fss-pub.nais.io
         - host: medlemskap-medl-api.prod-fss-pub.nais.io
+      rules:
+        - application: "digdir-krr-proxy"
+          namespace: "team-rocket"
+        - application: "kodeverk-api"
+          namespace: "team-rocket"
+        - application: "sokos-kontoregister-person"
+          namespace: "okonomi"
+        - application: "norg2"
+          namespace: "org"
   secureLogs:
     enabled: true
   resources:
