@@ -21,7 +21,7 @@ spec:
     min: 2
     max: 4
   ingresses:
-    - "https://www.intern.nav.no/tms-personopplysninger-api"
+    - "https://www.ansatt.nav.no/tms-personopplysninger-api"
   tokenx:
     enabled: true
   azure:
@@ -34,14 +34,10 @@ spec:
   accessPolicy:
     outbound:
       external:
-        - host: kodeverk-api.nav.no
-        - host: norg2.prod-fss-pub.nais.io
-        - host: digdir-krr-proxy.intern.nav.no
         - host: pdl-mottak.prod-fss-pub.nais.io
         - host: pdl-api.prod-fss-pub.nais.io
         - host: institusjon-opphold-proxy.prod-fss-pub.nais.io
         - host: medlemskap-medl-api.prod-fss-pub.nais.io
-        - host: sokos-kontoregister-person.intern.nav.no
   secureLogs:
     enabled: true
   resources:
@@ -54,25 +50,25 @@ spec:
     - name: DIGDIR_KRR_PROXY_CONSUMER_CLIENT_ID
       value: prod-gcp:team-rocket:digdir-krr-proxy
     - name: DIGDIR_KRR_PROXY_URL
-      value: https://digdir-krr-proxy.intern.nav.no
+      value: http://digdir-krr-proxy.team-rocket
     - name: INST2_API_URL
       value: https://inst2.prod-fss-pub.nais.io/api
     - name: INST2_CLIENT_ID
       value: prod-fss:team-rocket:inst2
     - name: KODEVERK_REST_API_URL
-      value: https://kodeverk-api.nav.no
+      value: http://kodeverk-api.team-rocket
     - name: KODEVERK_CLIENT_ID
       value: prod-gcp.team-rocket.kodeverk-api
     - name: KONTOREGISTER_CLIENT_ID
       value: prod-gcp:okonomi:sokos-kontoregister-person
     - name: KONTOREGISTER_URL
-      value: https://sokos-kontoregister-person.intern.nav.no
+      value: http://sokos-kontoregister-person.okonomi
     - name: MEDL_CLIENT_ID
       value: prod-fss:team-rocket:medlemskap-medl-api
     - name: MEDLEMSKAP_MEDL_API_URL
       value: https://medlemskap-medl-api.prod-fss-pub.nais.io
     - name: NORG2_API_URL
-      value: https://norg2.prod-fss-pub.nais.io/norg2
+      value: http://norg2.org
     - name: PDL_API_URL
       value: https://pdl-api.prod-fss-pub.nais.io/graphql
     - name: PDL_CONSUMER_CLIENT_ID
