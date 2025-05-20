@@ -79,7 +79,7 @@ class HentPersonaliaRouteTest : RouteTest() {
 
         if (setupNorg2) {
             externalService(norg2Url) {
-                get("/api/v1/enhet/navkontor/{geografiskId}") {
+                get("/norg2/api/v1/enhet/navkontor/{geografiskId}") {
                     if (call.pathParameters["geografiskId"] == HentPersonaliaTestData.geografiskTilknytning) {
                         call.respondText(ExternalResponse.norg2Enhet, contentType = ContentType.Application.Json)
                     } else {
@@ -87,7 +87,7 @@ class HentPersonaliaRouteTest : RouteTest() {
                     }
                 }
 
-                get("/api/v2/enhet/{enhetNr}/kontaktinformasjon") {
+                get("/norg2/api/v2/enhet/{enhetNr}/kontaktinformasjon") {
                     if (call.pathParameters["enhetNr"] == HentPersonaliaTestData.enhetsnummer) {
                         call.respondText(ExternalResponse.norg2Kontaktinfo, contentType = ContentType.Application.Json)
                     } else {
@@ -205,6 +205,31 @@ class HentPersonaliaRouteTest : RouteTest() {
             adresser["oppholdsadresser"].size() shouldBe 0
             adresser["deltBosted"].asTextOrNull() shouldBe null
         }
+
+        responseJson["enhetKontaktInformasjon"].let { enhet ->
+
+            enhet["navn"].asText() shouldBe HentPersonaliaTestData.enhetsKontaktinformasjon
+
+            enhet["brukerkontakt"]["publikumsmottak"][0].let { publikumsmottak ->
+                publikumsmottak["stedsbeskrivelse"].asText() shouldBe HentPersonaliaTestData.brukerkontaktStedsbeskrivelse
+                publikumsmottak["adkomstbeskrivelse"].asTextOrNull() shouldBe null
+
+                publikumsmottak["besoeksadresse"]["postnummer"].asText() shouldBe HentPersonaliaTestData.brukerkontaktPostnummer
+                publikumsmottak["besoeksadresse"]["poststed"].asText() shouldBe HentPersonaliaTestData.brukerkontaktPoststed
+                publikumsmottak["besoeksadresse"]["gatenavn"].asText() shouldBe HentPersonaliaTestData.brukerkontaktGatenavn
+                publikumsmottak["besoeksadresse"]["husnummer"].asText() shouldBe HentPersonaliaTestData.brukerkontaktHusnummer
+                publikumsmottak["besoeksadresse"]["husbokstav"].asTextOrNull() shouldBe null
+                publikumsmottak["besoeksadresse"]["adresseTilleggsnavn"].asTextOrNull() shouldBe null
+
+                publikumsmottak["aapningstider"][0]["dag"].asText() shouldBe HentPersonaliaTestData.brukerkontaktAapningstidDag
+                publikumsmottak["aapningstider"][0]["dato"].asTextOrNull() shouldBe null
+                publikumsmottak["aapningstider"][0]["fra"].asTextOrNull() shouldBe null
+                publikumsmottak["aapningstider"][0]["til"].asTextOrNull() shouldBe null
+                publikumsmottak["aapningstider"][0]["kommentar"].asText() shouldBe HentPersonaliaTestData.brukerkontaktAapningstidKommentar
+                publikumsmottak["aapningstider"][0]["stengt"].asText() shouldBe HentPersonaliaTestData.brukerkontaktAapningstidStengt
+                publikumsmottak["aapningstider"][0]["kunTimeavtale"].asText() shouldBe HentPersonaliaTestData.brukerkontaktAapningstidKunTimeavtale
+            }
+        }
     }
 
     @Test
@@ -241,7 +266,7 @@ class HentPersonaliaRouteTest : RouteTest() {
 
 
         externalService(norg2Url) {
-            get("/api/v1/enhet/navkontor/{geografiskId}") {
+            get("/norg2/api/v1/enhet/navkontor/{geografiskId}") {
                 if (call.pathParameters["geografiskId"] == HentPersonaliaTestData.geografiskTilknytning) {
                     headersEnhet = call.request.headers
                     call.respondText(ExternalResponse.norg2Enhet, contentType = ContentType.Application.Json)
@@ -250,7 +275,7 @@ class HentPersonaliaRouteTest : RouteTest() {
                 }
             }
 
-            get("/api/v2/enhet/{enhetNr}/kontaktinformasjon") {
+            get("/norg2/api/v2/enhet/{enhetNr}/kontaktinformasjon") {
                 if (call.pathParameters["enhetNr"] == HentPersonaliaTestData.enhetsnummer) {
                     headersKontaktinfo = call.request.headers
                     call.respondText(ExternalResponse.norg2Kontaktinfo, contentType = ContentType.Application.Json)
