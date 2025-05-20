@@ -21,6 +21,7 @@ import no.nav.tms.token.support.tokenx.validation.mock.tokenXMock
 import no.nav.tms.token.support.tokenx.validation.mock.LevelOfAssurance as TokenXLoa
 import no.nav.tms.token.support.idporten.sidecar.mock.LevelOfAssurance as IdPortenLoa
 import java.text.DateFormat
+import java.time.LocalDateTime
 
 abstract class RouteTest {
 
@@ -103,6 +104,7 @@ abstract class RouteTest {
     suspend fun ApplicationCall.receiveJson() = receiveText().let { objectMapper.readTree(it) }
 
     fun JsonNode.asTextOrNull() = if(isNull) null else asText()
+    fun JsonNode.asLocalDateTime() = LocalDateTime.parse(asText())
 
     enum class UserLoa {
         Substantial, High;

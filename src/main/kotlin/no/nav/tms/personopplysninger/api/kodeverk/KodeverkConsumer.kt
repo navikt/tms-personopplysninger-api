@@ -60,6 +60,10 @@ class KodeverkConsumer(
         return getKodeverk("Språk")
     }
 
+    suspend fun hentTema(): KodeverkBetydningerResponse {
+        return getKodeverk("Tema")
+    }
+
     private suspend fun getKodeverk(navn: String, ekskluderUgyldige: Boolean = true): KodeverkBetydningerResponse {
         return cache.get(navn to ekskluderUgyldige) {
             runBlocking(Dispatchers.IO) {
