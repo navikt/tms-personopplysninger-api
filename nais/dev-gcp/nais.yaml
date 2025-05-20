@@ -1,0 +1,88 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: tms-personopplysninger-api
+  namespace: min-side
+  labels:
+    team: min-side
+spec:
+  image: {{version}}
+  port: 8080
+  liveness:
+    path: /tms-personopplysninger-api/internal/isalive
+    initialDelay: 10
+  readiness:
+    path: /tms-personopplysninger-api/internal/isready
+    initialDelay: 10
+  prometheus:
+    enabled: true
+    path: /tms-personopplysninger-api/metrics
+  replicas:
+    min: 2
+    max: 4
+  ingresses:
+    - "https://www.ansatt.dev.nav.no/tms-personopplysninger-api"
+  tokenx:
+    enabled: true
+  azure:
+    application:
+      enabled: true
+  idporten:
+    enabled: true
+    sidecar:
+      enabled: true
+  accessPolicy:
+    outbound:
+      external:
+        - host: pdl-mottak.dev-fss-pub.nais.io
+        - host: pdl-api.dev-fss-pub.nais.io
+        - host: institusjon-opphold-proxy-q2.dev-fss-pub.nais.io
+        - host: medlemskap-medl-api.dev-fss-pub.nais.io
+      rules:
+        - application: "digdir-krr-proxy"
+          namespace: "team-rocket"
+        - application: "kodeverk-api"
+          namespace: "team-rocket"
+        - application: "sokos-kontoregister-person"
+          namespace: "okonomi"
+        - application: "norg2"
+          namespace: "org"
+  secureLogs:
+    enabled: true
+  resources:
+    limits:
+      memory: 768Mi
+    requests:
+      cpu: 10m
+      memory: 256Mi
+  env:
+    - name: DIGDIR_KRR_PROXY_CONSUMER_CLIENT_ID
+      value: dev-gcp:team-rocket:digdir-krr-proxy
+    - name: DIGDIR_KRR_PROXY_URL
+      value: http://digdir-krr-proxy.team-rocket
+    - name: INST2_API_URL
+      value: https://inst2-q2.dev-fss-pub.nais.io
+    - name: INST2_CLIENT_ID
+      value: dev-fss:team-rocket:inst2-q2
+    - name: KODEVERK_REST_API_URL
+      value: http://kodeverk-api.team-rocket
+    - name: KODEVERK_CLIENT_ID
+      value: dev-gcp.team-rocket.kodeverk-api
+    - name: KONTOREGISTER_CLIENT_ID
+      value: dev-gcp:okonomi:sokos-kontoregister-person
+    - name: KONTOREGISTER_URL
+      value: http://sokos-kontoregister-person.okonomi
+    - name: MEDL_CLIENT_ID
+      value: dev-fss:team-rocket:medlemskap-medl-api
+    - name: MEDLEMSKAP_MEDL_API_URL
+      value: https://medlemskap-medl-api.dev-fss-pub.nais.io
+    - name: NORG2_API_URL
+      value: http://norg2.org
+    - name: PDL_API_URL
+      value: https://pdl-api.dev-fss-pub.nais.io
+    - name: PDL_CONSUMER_CLIENT_ID
+      value: dev-fss:pdl:pdl-api
+    - name: PDL_MOTTAK_API_URL
+      value: https://pdl-mottak.dev-fss-pub.nais.io
+    - name: PDL_MOTTAK_CLIENT_ID
+      value: dev-fss:pdl:pdl-mottak

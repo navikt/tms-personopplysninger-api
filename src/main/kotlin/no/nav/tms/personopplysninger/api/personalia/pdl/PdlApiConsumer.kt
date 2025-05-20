@@ -1,0 +1,131 @@
+package no.nav.tms.personopplysninger.api.personalia.pdl
+
+import com.expediagroup.graphql.client.types.GraphQLClientError
+import com.expediagroup.graphql.client.types.GraphQLClientRequest
+import com.expediagroup.graphql.client.types.GraphQLClientResponse
+import com.expediagroup.graphql.client.types.GraphQLClientSourceLocation
+import io.github.oshai.kotlinlogging.KotlinLogging
+import io.ktor.client.*
+import io.ktor.client.call.*
+import io.ktor.client.plugins.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
+import no.nav.pdl.generated.dto.HentPersonQuery
+import no.nav.pdl.generated.dto.HentTelefonQuery
+import no.nav.tms.personopplysninger.api.UserPrincipal
+import no.nav.tms.personopplysninger.api.common.ConsumerMetrics
+import no.nav.tms.personopplysninger.api.common.HeaderHelper.addNavHeaders
+import no.nav.tms.personopplysninger.api.common.HeaderHelper.authorization
+import no.nav.tms.personopplysninger.api.common.TokenExchanger
+import java.util.*
+
+class PdlApiConsumer(
+    private val httpClient: HttpClient,
+    private val pdlUrl: String,
+    private val behandlingsnummer: String,
+    private val tokenExchanger: TokenExchanger
+) {
+
+    private val log = KotlinLogging.logger {}
+    private val secureLog = KotlinLogging.logger("secureLog")
+
+    private val metrics = ConsumerMetrics.init { }
+
+    suspend fun hentPerson(user: UserPrincipal): HentPersonQuery.Result {
+        return HentPersonQuery.Variables(ident = user.ident)
+            .let { HentPersonQuery(it) }
+            .let { executeQuery(it, user.accessToken) }
+    }
+
+    suspend fun hentTelefon(user: UserPrincipal): HentTelefonQuery.Result {
+        return HentTelefonQuery.Variables(ident = user.ident)
+            .let { HentTelefonQuery(it) }
+            .let { executeQuery(it, user.accessToken) }
+    }
+
+    private suspend inline fun <reified T : Any> executeQuery(request: GraphQLClientRequest<T>, token: String): T {
+        val pdlToken = tokenExchanger.pdlApiToken(token)
+
+        val rawResponse = sendQuery(request, pdlToken)
+
+        if (!rawResponse.status.isSuccess()) {
+            throw RuntimeException("Fikk http-status [${rawResponse.status}] fra PDL.")
+        }
+
+        val pdlResponse = parseBody<T>(rawResponse)
+
+        return pdlResponse.data
+            ?: throw RuntimeException("Ingen data i resultatet fra SAF.")
+    }
+
+    private suspend fun <T : Any> sendQuery(request: GraphQLClientRequest<T>, accessToken: String): HttpResponse {
+        return metrics.measureRequest(requestName(request)) {
+
+            val callId = UUID.randomUUID()
+            log.info { "Sender graphql-spørring med callId=$callId" }
+
+            httpClient.post {
+                url("$pdlUrl/graphql")
+
+                addNavHeaders()
+                authorization(accessToken)
+
+                header("behandlingsnummer", behandlingsnummer)
+
+                contentType(ContentType.Application.Json)
+                accept(ContentType.Application.Json)
+                setBody(request)
+                timeout {
+                    socketTimeoutMillis = 25000
+                    connectTimeoutMillis = 10000
+                    requestTimeoutMillis = 35000
+                }
+            }
+        }
+    }
+
+    private suspend inline fun <reified T: Any> parseBody(response: HttpResponse): GraphQLResponse<T> = try {
+        response.body<GraphQLResponse<T>>()
+            .also {
+                if (it.containsData() && it.containsErrors()) {
+                    val baseMsg = "Resultatet inneholdt data og feil, dataene returneres til bruker."
+                    log.warn { baseMsg }
+                    secureLog.warn {
+                        "$baseMsg Feilene var errors: ${it.errors}, extensions: ${it.extensions}"
+                    }
+                }
+            }
+    } catch (e: Exception) {
+        throw RuntimeException("Klarte ikke tolke respons fra PFL", e)
+    }
+
+    private fun requestName(request: GraphQLClientRequest<*>): String {
+        return when(request) {
+            is HentPersonQuery -> "hent_person"
+            is HentTelefonQuery -> "hent_telefon"
+            else -> "ukjent"
+        }
+    }
+
+    private fun GraphQLResponse<*>.containsData() = data != null
+    private fun GraphQLResponse<*>.containsErrors() = errors?.isNotEmpty() == true
+}
+
+private data class GraphQLResponse<T>(
+    override val data: T? = null,
+    override val errors: List<GraphQLError>? = null,
+    override val extensions: Map<String, Any?>? = null
+): GraphQLClientResponse<T>
+
+private data class GraphQLError(
+    override val message: String,
+    override val locations: List<GraphQLSourceLocation>? = null,
+    override val extensions: Map<String, Any?>? = null,
+    override val path: List<Any>? = null
+): GraphQLClientError
+
+private data class GraphQLSourceLocation(
+    override val line: Int,
+    override val column: Int
+): GraphQLClientSourceLocation

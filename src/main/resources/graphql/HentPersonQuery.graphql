@@ -1,0 +1,157 @@
+query HentPersonQuery($ident: ID!) {
+    person: hentPerson(ident: $ident) {
+        navn {
+            fornavn
+            mellomnavn
+            etternavn
+        }
+        telefonnummer {
+            landskode
+            nummer
+            prioritet
+        }
+        folkeregisteridentifikator {
+            identifikasjonsnummer
+            type
+        }
+        statsborgerskap {
+            land
+            gyldigTilOgMed
+        }
+        foedested {
+            foedekommune
+            foedeland
+        }
+        sivilstand {
+            type
+        }
+        kjoenn {
+            kjoenn
+        }
+        bostedsadresse {
+            angittFlyttedato
+            coAdressenavn
+            vegadresse {
+                ...vegadresseFields
+            }
+            matrikkeladresse {
+                ...matrikkeladresseFields
+            }
+            utenlandskAdresse {
+                ...utenlandskAdresseFields
+            }
+            ukjentBosted {
+                ...ukjentBostedFields
+            }
+        }
+        deltBosted {
+            coAdressenavn
+            vegadresse {
+                ...vegadresseFields
+            }
+            matrikkeladresse {
+                ...matrikkeladresseFields
+            }
+            utenlandskAdresse {
+                ...utenlandskAdresseFields
+            }
+            ukjentBosted {
+                ...ukjentBostedFields
+            }
+        }
+        kontaktadresse {
+            gyldigTilOgMed
+            coAdressenavn
+            postboksadresse {
+                ...postboksAdresseFields
+            }
+            vegadresse {
+                ...vegadresseFields
+            }
+            postadresseIFrittFormat {
+                ...postadresseIFrittFormatFields
+            }
+            utenlandskAdresse {
+                ...utenlandskAdresseFields
+            }
+            utenlandskAdresseIFrittFormat {
+                ...utenlandskAdresseIFrittFormatFields
+            }
+            metadata {
+                master
+            }
+        }
+        oppholdsadresse {
+            gyldigTilOgMed
+            coAdressenavn
+            utenlandskAdresse {
+                ...utenlandskAdresseFields
+            }
+            vegadresse {
+                ...vegadresseFields
+            }
+            matrikkeladresse {
+                ...matrikkeladresseFields
+            }
+            oppholdAnnetSted
+            metadata {
+                master
+            }
+        }
+    }
+    geografiskTilknytning: hentGeografiskTilknytning(ident: $ident) {
+        gtKommune
+        gtBydel
+    }
+}
+
+fragment postboksAdresseFields on Postboksadresse {
+    postbokseier
+    postboks
+    postnummer
+}
+
+fragment vegadresseFields on Vegadresse {
+    husnummer
+    husbokstav
+    bruksenhetsnummer
+    adressenavn
+    kommunenummer
+    tilleggsnavn
+    postnummer
+}
+
+fragment matrikkeladresseFields on Matrikkeladresse {
+    bruksenhetsnummer
+    tilleggsnavn
+    postnummer
+    kommunenummer
+}
+
+fragment utenlandskAdresseFields on UtenlandskAdresse {
+    adressenavnNummer
+    bygningEtasjeLeilighet
+    postboksNummerNavn
+    postkode
+    bySted
+    regionDistriktOmraade
+    landkode
+}
+
+fragment utenlandskAdresseIFrittFormatFields on UtenlandskAdresseIFrittFormat {
+    adresselinje1
+    adresselinje2
+    adresselinje3
+    landkode
+}
+
+fragment postadresseIFrittFormatFields on PostadresseIFrittFormat {
+    adresselinje1
+    adresselinje2
+    adresselinje3
+    postnummer
+}
+
+fragment ukjentBostedFields on UkjentBosted {
+    bostedskommune
+}
