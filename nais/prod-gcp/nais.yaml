@@ -38,7 +38,6 @@ spec:
         - host: pdl-api.prod-fss-pub.nais.io
         - host: institusjon-opphold-proxy.prod-fss-pub.nais.io
         - host: medlemskap-medl-api.prod-fss-pub.nais.io
-        - host: norg2.prod-fss-pub.nais.io
       rules:
         - application: "digdir-krr-proxy"
           namespace: "team-rocket"
@@ -78,7 +77,7 @@ spec:
     - name: MEDLEMSKAP_MEDL_API_URL
       value: https://medlemskap-medl-api.prod-fss-pub.nais.io
     - name: NORG2_API_URL
-      value: https://norg2.prod-fss-pub.nais.io
+      value: http://norg2.org
     - name: PDL_API_URL
       value: https://pdl-api.prod-fss-pub.nais.io
     - name: PDL_CONSUMER_CLIENT_ID
