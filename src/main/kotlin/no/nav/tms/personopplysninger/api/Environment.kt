@@ -28,6 +28,10 @@ data class Environment(
     val kontoregisterClientId: String = System.getenv("KONTOREGISTER_CLIENT_ID"),
     val kodeverkClientId: String = System.getenv("KODEVERK_CLIENT_ID"),
 
+    val eregServicesUrl: String = System.getenv("EREG_SERVICES_URL"),
+    val sporingsloggUrl: String = System.getenv("SPORINGSLOGG_URL"),
+    val sporingsloggClientId: String = System.getenv("SPORINGSLOGG_CLIENT_ID"),
+
     val pdlBehandlingsnummer: String = "B258"
 )
 

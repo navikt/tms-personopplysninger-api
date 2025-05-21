@@ -10,6 +10,7 @@ class TokenExchanger(
     private val medlClientId: String,
     private val inst2ClientId: String,
     private val krrProxyClientId: String,
+    private val sporingsloggClientId: String,
 ) {
     suspend fun pdlApiToken(accessToken: String): String {
         return tokendingsService.exchangeToken(accessToken, pdlApiClientId)
@@ -33,5 +34,9 @@ class TokenExchanger(
 
     suspend fun krrProxyToken(accessToken: String): String {
         return tokendingsService.exchangeToken(accessToken, krrProxyClientId)
+    }
+
+    suspend fun sporingsloggToken(accessToken: String): String {
+        return tokendingsService.exchangeToken(accessToken, sporingsloggClientId)
     }
 }

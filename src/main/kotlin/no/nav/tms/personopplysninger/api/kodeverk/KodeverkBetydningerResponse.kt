@@ -12,7 +12,7 @@ class KodeverkBetydningerResponse(
             ?.first()
             ?.tekst()
             ?: run {
-                log.warn { "Feil ved utledning av kodeverkstekst for $key" }
+                log.warn { "Fant ikke kodeverkstekst for [$key]" }
                 key
             }
     }
@@ -22,7 +22,7 @@ class KodeverkBetydningerResponse(
             ?.first()
             ?.term()
             ?: run {
-                log.warn { "Feil ved utledning av kodeverkstekst for $key" }
+                log.warn { "Fant ikke kodeverksterm for [$key]" }
                 key
             }
     }

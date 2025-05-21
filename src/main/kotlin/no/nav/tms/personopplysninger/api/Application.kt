@@ -23,6 +23,10 @@ import no.nav.tms.personopplysninger.api.personalia.OppdaterPersonaliaService
 import no.nav.tms.personopplysninger.api.personalia.norg2.Norg2Consumer
 import no.nav.tms.personopplysninger.api.personalia.pdl.PdlMottakConsumer
 import no.nav.tms.personopplysninger.api.personalia.personalia
+import no.nav.tms.personopplysninger.api.sporingslogg.EregServicesConsumer
+import no.nav.tms.personopplysninger.api.sporingslogg.SporingsloggConsumer
+import no.nav.tms.personopplysninger.api.sporingslogg.SporingsloggService
+import no.nav.tms.personopplysninger.api.sporingslogg.sporingsloggRoutes
 import no.nav.tms.token.support.azure.exchange.AzureServiceBuilder
 import no.nav.tms.token.support.tokendings.exchange.TokendingsServiceBuilder
 
@@ -39,7 +43,8 @@ fun main() {
         pdlMottakClientId = environment.pdlMottakClientId,
         medlClientId = environment.medlClientId,
         inst2ClientId = environment.inst2ClientId,
-        krrProxyClientId = environment.digdirKrrProxyClientId
+        krrProxyClientId = environment.digdirKrrProxyClientId,
+        sporingsloggClientId = environment.sporingsloggClientId
     )
 
     val kodeverkConsumer = KodeverkConsumer(httpClient, azureService, environment.kodeverkUrl, environment.kodeverkClientId)
@@ -77,6 +82,12 @@ fun main() {
         kodeverkConsumer = kodeverkConsumer
     )
 
+    val sporingsloggService = SporingsloggService(
+        sporingsloggConsumer = SporingsloggConsumer(httpClient, environment.sporingsloggUrl, tokenExchanger),
+        eregServicesConsumer = EregServicesConsumer(httpClient, environment.eregServicesUrl),
+        kodeverkConsumer = kodeverkConsumer
+    )
+
     val userRoutes: Route.() -> Unit = {
         personalia(hentPersonaliaService, oppdaterPersonaliaService)
         medlRoutes(medlService)
@@ -84,6 +95,7 @@ fun main() {
         kontaktinformasjonRoutes(kontaktinformasjonService)
         kontoregisterRoutes(kontoregisterConsumer)
         kodeverkRoutes(kodeverkConsumer)
+        sporingsloggRoutes(sporingsloggService)
     }
 
     embeddedServer(

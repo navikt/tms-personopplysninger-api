@@ -410,19 +410,44 @@ class HentPersonaliaRouteTest : RouteTest() {
     fun `feiler hvis pdl er nede`() = apiTest(internalRouteConfig) {
         setupDefaultExternalRoutes(setupPdl = false)
 
+        externalService(pdlApiUrl) {
+            get("/*") {
+                call.respond(HttpStatusCode.InternalServerError)
+            }
+        }
+
         client.get(hentPersonaliaPath).status shouldBe HttpStatusCode.InternalServerError
     }
 
     @Test
-    fun `feiler hvis norg2 er nede`() = apiTest(internalRouteConfig) {
+    fun `godtar at norg2 er nede og returnerer null for enhetKontaktInformasjon`() = apiTest(internalRouteConfig) {
         setupDefaultExternalRoutes(setupNorg2 = false)
 
-        client.get(hentPersonaliaPath).status shouldBe HttpStatusCode.InternalServerError
+        externalService(norg2Url) {
+            get("/*") {
+                call.respond(HttpStatusCode.InternalServerError)
+            }
+        }
+
+        val response = client.get(hentPersonaliaPath)
+
+        response.status shouldBe HttpStatusCode.OK
+        response.json().let { responseJson ->
+            responseJson["personalia"].isNull shouldBe false
+            responseJson["adresser"].isNull shouldBe false
+            responseJson["enhetKontaktInformasjon"].isNull shouldBe true
+        }
     }
 
     @Test
     fun `goddtar at kontoregister er nede`() = apiTest(internalRouteConfig) {
         setupDefaultExternalRoutes(setupKontoregister = false)
+
+        externalService(kontoregisterUrl) {
+            get("/*") {
+                call.respond(HttpStatusCode.InternalServerError)
+            }
+        }
 
         client.get(hentPersonaliaPath).status shouldBe HttpStatusCode.OK
     }
@@ -430,6 +455,12 @@ class HentPersonaliaRouteTest : RouteTest() {
     @Test
     fun `feiler hvis kodeverk er nede`() = apiTest(internalRouteConfig) {
         setupDefaultExternalRoutes(setupKodeverk = false)
+
+        externalService(kodeverkUrl) {
+            get("/*") {
+                call.respond(HttpStatusCode.InternalServerError)
+            }
+        }
 
         client.get(hentPersonaliaPath).status shouldBe HttpStatusCode.InternalServerError
     }
