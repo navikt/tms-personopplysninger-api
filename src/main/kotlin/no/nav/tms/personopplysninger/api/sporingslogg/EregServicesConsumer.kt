@@ -6,6 +6,7 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.statement.*
 import io.ktor.http.isSuccess
+import no.nav.tms.personopplysninger.api.common.ConsumerMetrics
 
 
 class EregServicesConsumer(
@@ -15,9 +16,13 @@ class EregServicesConsumer(
     private val log = KotlinLogging.logger { }
     private val secureLog = KotlinLogging.logger("secureLog")
 
+    private val metrics = ConsumerMetrics.init { }
+
     suspend fun hentOrganisasjonsnavn(orgnr: String): String {
 
-        val eregResponse = client.get("$eregServicesUrl/v1/organisasjon/$orgnr/noekkelinfo")
+        val eregResponse = metrics.measureRequest("organisasjon_info") {
+            client.get("$eregServicesUrl/v1/organisasjon/$orgnr/noekkelinfo")
+        }
 
         return if (eregResponse.status.isSuccess()) {
             eregResponse.body<EregOrganisasjon>()
