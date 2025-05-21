@@ -4,8 +4,8 @@ import java.time.LocalDateTime
 
 object SporingsloggTestData {
 
-    const val tema = "Fiktivt tema"
-    const val mottaker = "123456789"
+    const val temanavn = "Fiktivt tema"
+    const val mottakerOrgnr = "123456789"
     const val mottakernavn = "ARBEIDS- OG VELFERDSETATEN DUMMY DRIFT"
     const val leverteData = "eyJlYXN0ZXIiOiAiZWdnIn0K"
     const val samtykkeToken = "<samtykketoken>"
