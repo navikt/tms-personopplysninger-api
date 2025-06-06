@@ -8,4 +8,9 @@ fun Route.sporingsloggRoutes(service: SporingsloggService) {
     get("/sporingslogg") {
         call.respond(service.hentSporingslogg(call.user))
     }
+
+    // for bakoverkompatibilitet med personopplysninger
+    get("/sporingslogg/get") {
+        call.respond(service.hentSporingslogg(call.user))
+    }
 }

@@ -118,6 +118,18 @@ class HentSporingsloggRouteTest: RouteTest() {
     }
 
     @Test
+    fun `svarer med samme på path 'get' for bakoverkompatibilitet`() = apiTest(internalRouteConfig) {
+        setupDefaultExternalRoutes()
+
+        val response = client.get("$hentSporingsloggPath/get")
+        val responseLegacy = client.get("$hentSporingsloggPath/get")
+
+        responseLegacy.status shouldBe HttpStatusCode.OK
+
+        response.json().toString() shouldBe responseLegacy.json().toString()
+    }
+
+    @Test
     fun `bruker kun auth-header mot sporingslogg`() = apiTest(internalRouteConfig) { client ->
         var headers: Headers? = null
 
