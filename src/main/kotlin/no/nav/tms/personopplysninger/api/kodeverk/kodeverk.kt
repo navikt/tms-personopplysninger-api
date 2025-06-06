@@ -6,7 +6,7 @@ data class AdresseKodeverk (
     val kommune: String? = null,
 )
 
-class PersonaliaKodeverk(
+data class PersonaliaKodeverk(
     val foedelandterm: String? = null,
     val foedekommuneterm: String? = null,
     val statsborgerskaptermer: List<String> = emptyList(),

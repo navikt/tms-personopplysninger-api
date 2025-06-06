@@ -38,6 +38,8 @@ spec:
         - host: pdl-api.prod-fss-pub.nais.io
         - host: institusjon-opphold-proxy.prod-fss-pub.nais.io
         - host: medlemskap-medl-api.prod-fss-pub.nais.io
+        - host: ereg-services.prod-fss-pub.nais.io
+        - host: sporingslogg.prod-fss-pub.nais.io
       rules:
         - application: "digdir-krr-proxy"
           namespace: "team-rocket"
@@ -86,3 +88,9 @@ spec:
       value: https://pdl-mottak.prod-fss-pub.nais.io
     - name: PDL_MOTTAK_CLIENT_ID
       value: prod-fss:pdl:pdl-mottak
+    - name: EREG_SERVICES_URL
+      value: https://ereg-services.prod-fss-pub.nais.io
+    - name: SPORINGSLOGG_URL
+      value: https://sporingslogg.prod-fss-pub.nais.io
+    - name: SPORINGSLOGG_CLIENT_ID
+      value: prod-fss:pensjonsamhandling:sporingslogg
