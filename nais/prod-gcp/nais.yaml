@@ -22,6 +22,7 @@ spec:
     max: 4
   ingresses:
     - "https://www.nav.no/tms-personopplysninger-api"
+    - "https://www.intern.nav.no/tms-personopplysninger-api"
   tokenx:
     enabled: true
   azure:
