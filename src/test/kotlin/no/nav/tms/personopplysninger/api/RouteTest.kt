@@ -36,6 +36,7 @@ abstract class RouteTest {
         internalRouteConfig: (HttpClient) -> (Route.() -> Unit),
         userIdent: String = testIdent,
         userLoa: UserLoa = UserLoa.High,
+        corsAllowedOrigins: String = "*",
         block: suspend ApplicationTestBuilder.(HttpClient) -> Unit
     ) = testApplication {
 
@@ -53,6 +54,8 @@ abstract class RouteTest {
             mainModule(
                 internalRouteConfig(serverClient),
                 serverClient,
+                corsAllowedOrigins = corsAllowedOrigins,
+                corsAllowedSchemes = "http",
                 authInstaller = {
                     authentication {
                         idPortenMock {

@@ -107,7 +107,12 @@ fun main() {
         },
         module = {
             rootPath = "tms-personopplysninger-api"
-            mainModule(userRoutes, httpClient)
+            mainModule(
+                userRoutes = userRoutes,
+                httpClient = httpClient,
+                corsAllowedOrigins = environment.corsAllowedOrigins,
+                corsAllowedSchemes = environment.corsAllowedSchemes
+            )
         }
     ).start(wait = true)
 }

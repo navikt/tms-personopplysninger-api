@@ -38,6 +38,7 @@ dependencies {
     implementation(KotlinLogging.logging)
     implementation(Ktor.Server.contentNegotiation)
     implementation(Ktor.Server.core)
+    implementation(Ktor.Server.cors)
     implementation(Ktor.Server.defaultHeaders)
     implementation(Ktor.Server.netty)
     implementation(Ktor.Server.htmlDsl)

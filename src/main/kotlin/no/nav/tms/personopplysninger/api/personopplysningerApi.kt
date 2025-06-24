@@ -12,6 +12,7 @@ import io.ktor.serialization.jackson.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.plugins.cors.routing.*
 import io.ktor.server.plugins.defaultheaders.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.request.*
@@ -30,6 +31,8 @@ import no.nav.tms.token.support.tokenx.validation.user.TokenXUserFactory
 fun Application.mainModule(
     userRoutes: Route.() -> Unit,
     httpClient: HttpClient,
+    corsAllowedOrigins: String,
+    corsAllowedSchemes: String,
     authInstaller: Application.() -> Unit = {
         authentication {
             idPorten {
@@ -45,9 +48,15 @@ fun Application.mainModule(
     val log = KotlinLogging.logger {}
     val secureLog = KotlinLogging.logger("secureLog")
 
+    authInstaller()
+
     install(DefaultHeaders)
 
-    authInstaller()
+    install(CORS) {
+        allowHost(host = corsAllowedOrigins, schemes = listOf(corsAllowedSchemes))
+        allowCredentials = true
+        allowHeader(HttpHeaders.ContentType)
+    }
 
     install(StatusPages) {
         exception<Throwable> { call, cause ->
