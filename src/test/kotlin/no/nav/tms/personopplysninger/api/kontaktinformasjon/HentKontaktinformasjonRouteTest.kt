@@ -49,13 +49,17 @@ class HentKontaktinformasjonRouteTest : RouteTest() {
 
     private val krrResponse = """
 {
-  "personident": "$testIdent",
-  "aktiv": true,
-  "kanVarsles": false,
-  "reservert": false,
-  "epostadresse": "test@dummy.com",
-  "mobiltelefonnummer": "12345678",
-  "spraak": "nb"
+  "personer": {
+    "$testIdent": {
+      "personident": "$testIdent",
+      "aktiv": true,
+      "kanVarsles": false,
+      "reservert": false,
+      "epostadresse": "test@dummy.com",
+      "mobiltelefonnummer": "12345678",
+      "spraak": "nb"
+    }
+  }
 }
 """.trimIndent()
 
@@ -87,7 +91,7 @@ class HentKontaktinformasjonRouteTest : RouteTest() {
         }
 
         externalService(krrProxyUrl) {
-            get("/rest/v1/person") {
+            post("/rest/v1/personer") {
                 call.respondText(krrResponse, ContentType.Application.Json)
             }
         }
@@ -114,7 +118,7 @@ class HentKontaktinformasjonRouteTest : RouteTest() {
         }
 
         externalService(krrProxyUrl) {
-            get("/rest/v1/person") {
+            post("/rest/v1/personer") {
                 headers = call.request.headers
                 call.respondText(krrResponse, ContentType.Application.Json)
             }
@@ -126,7 +130,6 @@ class HentKontaktinformasjonRouteTest : RouteTest() {
             it[HttpHeaders.Authorization] shouldBe "Bearer $krrProxyToken"
             it[HeaderHelper.NAV_CONSUMER_ID_HEADER] shouldBe HeaderHelper.NAV_CONSUMER_ID
             it[HeaderHelper.CALL_ID_HEADER].shouldNotBeNull()
-            it[HeaderHelper.NAV_PERSONIDENT_HEADER] shouldBe testIdent
         }
     }
 
@@ -139,7 +142,7 @@ class HentKontaktinformasjonRouteTest : RouteTest() {
         }
 
         externalService(krrProxyUrl) {
-            get("/rest/v1/person") {
+            post("/rest/v1/personer") {
                 call.respond(HttpStatusCode.BadRequest)
             }
         }
