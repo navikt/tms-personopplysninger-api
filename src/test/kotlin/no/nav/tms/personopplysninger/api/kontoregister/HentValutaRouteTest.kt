@@ -57,7 +57,9 @@ class HentValutaRouteTest : RouteTest() {
         response.status shouldBe HttpStatusCode.OK
         response.json().first().let {
             it["valutakode"].asText() shouldBe "EUR"
+            it["kode"].asText() shouldBe "EUR"
             it["valuta"].asText() shouldBe "Euro"
+            it["tekst"].asText() shouldBe "Euro"
         }
     }
 

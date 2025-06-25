@@ -56,7 +56,9 @@ class HentLandRouteTest : RouteTest() {
         response.status shouldBe HttpStatusCode.OK
         response.json().first().let {
             it["landkode"].asText() shouldBe "NO"
+            it["kode"].asText() shouldBe "NO"
             it["land"].asText() shouldBe "Norge"
+            it["tekst"].asText() shouldBe "Norge"
             it["kreverIban"].asBoolean() shouldBe true
             it["ibanLengde"].asInt() shouldBe 15
             it["kreverBankkode"].asBoolean() shouldBe false

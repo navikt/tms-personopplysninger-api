@@ -59,7 +59,10 @@ object KontoResponse {
         val kreverBankkode: Boolean,
         val bankkodeLengde: Int? = null,
         val alternativLandkode: String? = null
-    )
+    ) {
+        @Deprecated("Bruk landkode") val kode = landkode
+        @Deprecated("Bruk land") val tekst = land
+    }
 
     data class UtenlandskKontoInformasjon (
         val bank: Bank? = null,
@@ -75,5 +78,8 @@ object KontoResponse {
     data class Valutakode(
         val valutakode: String,
         val valuta: String,
-    )
+    ) {
+        @Deprecated("Bruk valutakode") val kode = valutakode
+        @Deprecated("Bruk valuta") val tekst = valuta
+    }
 }
