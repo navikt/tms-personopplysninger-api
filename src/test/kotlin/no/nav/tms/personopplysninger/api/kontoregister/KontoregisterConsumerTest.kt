@@ -129,8 +129,8 @@ class KontoregisterConsumerTest {
     private val dummyValutakoder = """
 [
     {
-        "valutakode" : "DUM",
-        "valuta" : "Dummy"
+        "valutakode": "DUM",
+        "valuta": "Dummy"
     }
 ]
     """.trimIndent()

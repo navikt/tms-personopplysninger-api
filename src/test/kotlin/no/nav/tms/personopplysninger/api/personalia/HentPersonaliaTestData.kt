@@ -265,15 +265,15 @@ object HentPersonaliaTestData {
         const val kontoregisterLandkoder = """
 [
   {
-    "landkode" : "NO",
-    "land" : "Norge",
+    "landkode": "NO",
+    "land": "Norge",
     "kreverIban" : true,
     "ibanLengde" : 15,
     "kreverBankkode" : false
   },
   {
-    "landkode" : "SE",
-    "land" : "Sverige",
+    "landkode": "SE",
+    "land": "Sverige",
     "kreverIban" : true,
     "ibanLengde" : 24,
     "kreverBankkode" : false
@@ -284,12 +284,12 @@ object HentPersonaliaTestData {
         const val kontoregisterValutakoder = """
 [ 
     {
-      "valutakode" : "NOK",
-      "valuta" : "Norsk krone"
+      "valutakode": "NOK",
+      "valuta": "Norsk krone"
     },
     {
-      "valutakode" : "SEK",
-      "valuta" : "Svensk krone"
+      "valutakode": "SEK",
+      "valuta": "Svensk krone"
     }
 ]
 """

@@ -34,11 +34,11 @@ class HentLandRouteTest : RouteTest() {
     private val externalResponse = """
 [
     {
-      "landkode" : "NO",
-      "land" : "Norge",
-      "kreverIban" : true,
-      "ibanLengde" : 15,
-      "kreverBankkode" : false
+      "landkode": "NO",
+      "land": "Norge",
+      "kreverIban": true,
+      "ibanLengde": 15,
+      "kreverBankkode": false
     }
 ]
     """

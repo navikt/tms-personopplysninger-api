@@ -37,6 +37,7 @@ abstract class RouteTest {
         userIdent: String = testIdent,
         userLoa: UserLoa = UserLoa.High,
         corsAllowedOrigins: String = "*",
+        corsAllowedSchemes: String = "http",
         block: suspend ApplicationTestBuilder.(HttpClient) -> Unit
     ) = testApplication {
 

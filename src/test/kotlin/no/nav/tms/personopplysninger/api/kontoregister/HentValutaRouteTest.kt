@@ -34,11 +34,11 @@ class HentValutaRouteTest : RouteTest() {
     private val externalResponse = """
 [ 
     {
-      "valutakode" : "EUR",
-      "valuta" : "Euro"
+      "valutakode": "EUR",
+      "valuta": "Euro"
     }, {
-      "valutakode" : "NOK",
-      "valuta" : "Norsk krone"
+      "valutakode": "NOK",
+      "valuta": "Norsk krone"
     }
 ]
     """
