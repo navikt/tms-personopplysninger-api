@@ -38,11 +38,12 @@ spec:
         - host: pdl-mottak.prod-fss-pub.nais.io
         - host: pdl-api.prod-fss-pub.nais.io
         - host: institusjon-opphold-proxy.prod-fss-pub.nais.io
-        - host: medlemskap-medl-api.prod-fss-pub.nais.io
         - host: ereg-services.prod-fss-pub.nais.io
         - host: sporingslogg.prod-fss-pub.nais.io
       rules:
         - application: "digdir-krr-proxy"
+          namespace: "team-rocket"
+        - application: "medlemskap-medl-api"
           namespace: "team-rocket"
         - application: "kodeverk-api"
           namespace: "team-rocket"
@@ -76,9 +77,9 @@ spec:
     - name: KONTOREGISTER_URL
       value: http://sokos-kontoregister-person.okonomi
     - name: MEDL_CLIENT_ID
-      value: prod-fss:team-rocket:medlemskap-medl-api
+      value: prod-gcp:team-rocket:medlemskap-medl-api
     - name: MEDLEMSKAP_MEDL_API_URL
-      value: https://medlemskap-medl-api.prod-fss-pub.nais.io
+      value: http://medlemskap-medl-api.team-rocket
     - name: NORG2_API_URL
       value: http://norg2.org
     - name: PDL_API_URL
