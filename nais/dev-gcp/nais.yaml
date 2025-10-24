@@ -52,6 +52,10 @@ spec:
           namespace: "org"
   secureLogs:
     enabled: true
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
   resources:
     limits:
       memory: 768Mi
