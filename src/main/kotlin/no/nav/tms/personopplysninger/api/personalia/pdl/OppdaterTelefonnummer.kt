@@ -47,7 +47,7 @@ enum class EndringsType {
 }
 
 data class Telefonnummer(
-    @JsonProperty("@type")
+    @param:JsonProperty("@type")
     override val subtype: String = "TELEFONNUMMER",
     override val kilde: String = "BRUKER SELV",
     val landskode: String,
@@ -56,7 +56,7 @@ data class Telefonnummer(
 ): Endringsmelding
 
 data class OpphoerEndringsMelding(
-    @JsonProperty("@type")
+    @param:JsonProperty("@type")
     override val subtype: String = "OPPHOER",
     override val kilde: String = "BRUKER SELV",
 ) : Endringsmelding

@@ -13,6 +13,7 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import no.nav.pdl.generated.dto.HentPersonQuery
 import no.nav.pdl.generated.dto.HentTelefonQuery
+import no.nav.tms.common.logging.TeamLogs
 import no.nav.tms.personopplysninger.api.UserPrincipal
 import no.nav.tms.personopplysninger.api.common.ConsumerMetrics
 import no.nav.tms.personopplysninger.api.common.HeaderHelper.addNavHeaders
@@ -28,7 +29,7 @@ class PdlApiConsumer(
 ) {
 
     private val log = KotlinLogging.logger {}
-    private val secureLog = KotlinLogging.logger("secureLog")
+    private val teamLog = TeamLogs.logger { }
 
     private val metrics = ConsumerMetrics.init { }
 
@@ -91,7 +92,7 @@ class PdlApiConsumer(
                 if (it.containsData() && it.containsErrors()) {
                     val baseMsg = "Resultatet inneholdt data og feil, dataene returneres til bruker."
                     log.warn { baseMsg }
-                    secureLog.warn {
+                    teamLog.warn {
                         "$baseMsg Feilene var errors: ${it.errors}, extensions: ${it.extensions}"
                     }
                 }

@@ -6,6 +6,7 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.statement.*
 import io.ktor.http.isSuccess
+import no.nav.tms.common.logging.TeamLogs
 import no.nav.tms.personopplysninger.api.common.ConsumerException
 import no.nav.tms.personopplysninger.api.common.ConsumerMetrics
 import no.nav.tms.personopplysninger.api.common.HeaderHelper.addNavHeaders
@@ -16,7 +17,7 @@ class Norg2Consumer(
 ) {
 
     private val log = KotlinLogging.logger { }
-    private val securelog = KotlinLogging.logger("secureLog")
+    private val teamLog = TeamLogs.logger { }
 
     private val metrics = ConsumerMetrics.init { }
 
@@ -34,7 +35,7 @@ class Norg2Consumer(
             val message = response.bodyAsText()
 
             log.warn { "Feil oppstod ved henting av enhet, returnerer tomt objekt. Status=[${response.status}]" }
-            securelog.warn { "Feil oppstod ved henting av enhet, returnerer tomt objekt. Status=[${response.status}], melding=[$message]" }
+            teamLog.warn { "Feil oppstod ved henting av enhet, returnerer tomt objekt. Status=[${response.status}], melding=[$message]" }
             null
         }
     }

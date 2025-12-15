@@ -6,6 +6,7 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.statement.*
 import io.ktor.http.isSuccess
+import no.nav.tms.common.logging.TeamLogs
 import no.nav.tms.personopplysninger.api.common.ConsumerMetrics
 
 
@@ -14,7 +15,7 @@ class EregServicesConsumer(
     private val eregServicesUrl: String
 ) {
     private val log = KotlinLogging.logger { }
-    private val secureLog = KotlinLogging.logger("secureLog")
+    private val teamLog = TeamLogs.logger { }
 
     private val metrics = ConsumerMetrics.init { }
 
@@ -30,7 +31,7 @@ class EregServicesConsumer(
                 .joinedToString()
         } else {
             val feilmelding = eregResponse.bodyAsText()
-            secureLog.warn { "Oppslag mot EREG på organisasjonsnummer [$orgnr] feilet med melding: [$feilmelding]." }
+            teamLog.warn { "Oppslag mot EREG på organisasjonsnummer [$orgnr] feilet med melding: [$feilmelding]." }
             log.warn { "Oppslag mot EREG på organisasjonsnummer [$orgnr] feilet." }
 
             orgnr
