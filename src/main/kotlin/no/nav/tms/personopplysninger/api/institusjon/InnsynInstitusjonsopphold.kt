@@ -11,7 +11,7 @@ data class InnsynInstitusjonsopphold (
     val faktiskSluttdato: LocalDate? = null,
     val fiktivSluttdato: Boolean? = null,
     val registreringstidspunkt: LocalDateTime,
-    @JsonAlias("institusjonstype")
+    @param:JsonAlias("institusjonstype")
     private val institusjonstypekode: Institusjonstype? = null
 ) {
     val institusjonstype = institusjonstypekode?.tekst

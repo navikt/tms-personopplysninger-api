@@ -51,8 +51,8 @@ spec:
           namespace: "okonomi"
         - application: "norg2"
           namespace: "org"
-  secureLogs:
-    enabled: true
+        - application: logging
+          namespace: nais-system
   observability:
     autoInstrumentation:
       enabled: true

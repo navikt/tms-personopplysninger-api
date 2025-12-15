@@ -18,6 +18,7 @@ import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import no.nav.tms.common.logging.TeamLogs
 import no.nav.tms.common.metrics.installTmsMicrometerMetrics
 import no.nav.tms.personopplysninger.api.common.ConsumerException
 import no.nav.tms.personopplysninger.api.common.ConsumerMetrics
@@ -47,7 +48,7 @@ fun Application.mainModule(
     }
 ) {
     val log = KotlinLogging.logger {}
-    val secureLog = KotlinLogging.logger("secureLog")
+    val teamLog = TeamLogs.logger { }
 
     authInstaller()
 
@@ -64,10 +65,10 @@ fun Application.mainModule(
             when(cause) {
                 is ConsumerException -> {
                     log.error { "Kall mot ${cause.externalService} [${cause.endpoint}] feiler med kode [${cause.status}]" }
-                    secureLog.error { "Kall mot krr-proxy [${cause.endpoint}] feiler med kode [${cause.status}] og melding: ${cause.responseContent}" }
+                    teamLog.error { "Kall mot krr-proxy [${cause.endpoint}] feiler med kode [${cause.status}] og melding: ${cause.responseContent}" }
                 }
                 else -> {
-                    secureLog.warn(cause) { "Kall til ${call.request.uri} feilet: ${cause.message}" }
+                    teamLog.warn(cause) { "Kall til ${call.request.uri} feilet: ${cause.message}" }
                 }
             }
             call.respond(HttpStatusCode.InternalServerError)
