@@ -15,8 +15,9 @@ import no.nav.tms.personopplysninger.api.common.HeaderHelper.authorization
 import no.nav.tms.personopplysninger.api.common.TokenExchanger
 import no.nav.tms.personopplysninger.api.personalia.EndringResult
 import no.nav.tms.personopplysninger.api.personalia.TelefonnummerEndring
-import no.nav.tms.personopplysninger.api.personalia.pdl.OppdaterTelefonnummer.Companion.endreTelefonnummerPayload
-import no.nav.tms.personopplysninger.api.personalia.pdl.OppdaterTelefonnummer.Companion.slettTelefonnummerPayload
+import no.nav.tms.personopplysninger.api.personalia.pdl.OppdaterPersonopplysning.Companion.endreTelefonnummerPayload
+import no.nav.tms.personopplysninger.api.personalia.pdl.OppdaterPersonopplysning.Companion.slettKontaktadressePayload
+import no.nav.tms.personopplysninger.api.personalia.pdl.OppdaterPersonopplysning.Companion.slettTelefonnummerPayload
 
 class PdlMottakConsumer(
     private val client: HttpClient,
@@ -40,7 +41,12 @@ class PdlMottakConsumer(
         return sendPdlEndring(user, payload)
     }
 
-    private suspend fun sendPdlEndring(user: UserPrincipal, payload: OppdaterTelefonnummer): EndringResult {
+    suspend fun slettKontaktadresse(user: UserPrincipal, opplysningsId: String): EndringResult {
+        val payload = slettKontaktadressePayload(user.ident, opplysningsId)
+        return sendPdlEndring(user, payload)
+    }
+
+    private suspend fun sendPdlEndring(user: UserPrincipal, payload: OppdaterPersonopplysning): EndringResult {
         val exchangedToken = tokenExchanger.pdlMottakToken(user.accessToken)
 
         val response = metrics.measureRequest(requestName(payload)) {
@@ -117,14 +123,14 @@ class PdlMottakConsumer(
         }
     }
 
-    private fun requestName(oppdaterTelefonnummer: OppdaterTelefonnummer): String {
+    private fun requestName(oppdaterTelefonnummer: OppdaterPersonopplysning): String {
         return when(oppdaterTelefonnummer.endringstype) {
             EndringsType.OPPHOER -> "slett_telefon"
             EndringsType.OPPRETT -> "oppdater_telefon"
         }
     }
 
-    data class PersonEndring(val personopplysninger: List<OppdaterTelefonnummer>) {
-        constructor(personopplysning: OppdaterTelefonnummer) : this(listOf(personopplysning))
+    data class PersonEndring(val personopplysninger: List<OppdaterPersonopplysning>) {
+        constructor(personopplysning: OppdaterPersonopplysning) : this(listOf(personopplysning))
     }
 }

@@ -1,10 +1,10 @@
 package no.nav.tms.personopplysninger.api.personalia
 
 import com.fasterxml.jackson.databind.JsonNode
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.ktor.client.request.*
-import io.ktor.client.request.url
 import io.ktor.http.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -21,7 +21,7 @@ import no.nav.tms.personopplysninger.api.personalia.pdl.PendingEndring
 import no.nav.tms.personopplysninger.api.routeConfig
 import org.junit.jupiter.api.Test
 
-class SlettTelefonnummerRouteTest : RouteTest() {
+class SlettKontaktadresseRouteTest : RouteTest() {
 
     private val pdlApiUrl = "http://pdl-api"
     private val pdlMottakUrl = "http://pdl-mottak"
@@ -47,11 +47,10 @@ class SlettTelefonnummerRouteTest : RouteTest() {
         }
     }
 
-    private val slettTelefonnummerPath = "/slettTelefonnummer"
-    private val slettRequest = TelefonnummerEndring(landskode = "+47", nummer = "12345678")
+    private val slettKontaktadressePath = "/slettKontaktadresse"
 
     @Test
-    fun `tillater endring av telefonnummer via pdl-mottak`() = apiTest(internalRouteConfig) { client ->
+    fun `tillater sletting av kontaktadresse via pdl-mottak dersom pdl er master`() = apiTest(internalRouteConfig) { client ->
 
         val pollEndringPath = "/poll/endring"
         val pollEndringResponse = listOf(
@@ -62,15 +61,15 @@ class SlettTelefonnummerRouteTest : RouteTest() {
             )
         )
 
+        val pdlMaster  = "PDL"
         val opplysningsId = "123"
 
         var capturedPayload: JsonNode? = null
 
         externalService(pdlApiUrl) {
             post("/graphql") {
-                call.respondText(hentTelefonnummerResponse(
-                    landskode = slettRequest.landskode,
-                    nummer = slettRequest.nummer,
+                call.respondText(hentKontaktadresseResponse(
+                    master = pdlMaster,
                     opplysningsId = opplysningsId
                 ), contentType = ContentType.Application.Json)
             }
@@ -89,9 +88,8 @@ class SlettTelefonnummerRouteTest : RouteTest() {
         }
 
         val response = client.post {
-            url(slettTelefonnummerPath)
+            url(slettKontaktadressePath)
             contentType(ContentType.Application.Json)
-            setBody(slettRequest)
         }
 
         response.status shouldBe HttpStatusCode.OK
@@ -106,7 +104,7 @@ class SlettTelefonnummerRouteTest : RouteTest() {
             .first()
             .let {
                 it["ident"].asText() shouldBe testIdent
-                it["opplysningstype"].asText() shouldBe "TELEFONNUMMER"
+                it["opplysningstype"].asText() shouldBe "KONTAKTADRESSE"
                 it["endringstype"].asText() shouldBe EndringsType.OPPHOER.name
                 it["opplysningsId"].asText() shouldBe opplysningsId
 
@@ -116,32 +114,23 @@ class SlettTelefonnummerRouteTest : RouteTest() {
     }
 
     @Test
-    fun `svarer med UnprocessableEntity-feil dersom angitt telefonnummer ikke finnes i pdl`() = apiTest(internalRouteConfig) { client ->
+    fun `svarer med UnprocessableEntity-feil dersom det ikke finnes kontaktadresse der PDL er master`() = apiTest(internalRouteConfig) { client ->
 
-        val pdlLandskode = "+47"
-        val pdlTelefonnummer = "46000000"
-
-        val requestNummer = TelefonnummerEndring(
-            landskode = "+47",
-            nummer = "92000000"
-        )
-
+        val fregMaster = "FREG"
         val opplysningsId = "123"
 
         externalService(pdlApiUrl) {
             post("/graphql") {
-                call.respondText(hentTelefonnummerResponse(
-                    landskode = pdlLandskode,
-                    nummer = pdlTelefonnummer,
+                call.respondText(hentKontaktadresseResponse(
+                    master = fregMaster,
                     opplysningsId = opplysningsId
                 ), contentType = ContentType.Application.Json)
             }
         }
 
         val response = client.post {
-            url(slettTelefonnummerPath)
+            url(slettKontaktadressePath)
             contentType(ContentType.Application.Json)
-            setBody(requestNummer)
         }
 
         response.status shouldBe HttpStatusCode.UnprocessableEntity
@@ -157,9 +146,8 @@ class SlettTelefonnummerRouteTest : RouteTest() {
             post("/graphql") {
                 apiHeaders = call.request.headers
 
-                call.respondText(hentTelefonnummerResponse(
-                    landskode = slettRequest.landskode,
-                    nummer = slettRequest.nummer,
+                call.respondText(hentKontaktadresseResponse(
+                    master = "PDL",
                     opplysningsId = "123"
                 ), contentType = ContentType.Application.Json)
             }
@@ -174,9 +162,8 @@ class SlettTelefonnummerRouteTest : RouteTest() {
         }
 
         client.post {
-            url(slettTelefonnummerPath)
+            url(slettKontaktadressePath)
             contentType(ContentType.Application.Json)
-            setBody(slettRequest)
         }
 
         apiHeaders.shouldNotBeNull().let {
@@ -203,9 +190,8 @@ class SlettTelefonnummerRouteTest : RouteTest() {
         }
 
         val response = client.post {
-            url(slettTelefonnummerPath)
+            url(slettKontaktadressePath)
             contentType(ContentType.Application.Json)
-            setBody(slettRequest)
         }
 
         response.status shouldBe HttpStatusCode.InternalServerError
@@ -216,9 +202,8 @@ class SlettTelefonnummerRouteTest : RouteTest() {
 
         externalService(pdlApiUrl) {
             post("/graphql") {
-                call.respondText(hentTelefonnummerResponse(
-                    landskode = slettRequest.landskode,
-                    nummer = slettRequest.nummer,
+                call.respondText(hentKontaktadresseResponse(
+                    master = "PDL",
                     opplysningsId = "123"
                 ), contentType = ContentType.Application.Json)
             }
@@ -231,9 +216,8 @@ class SlettTelefonnummerRouteTest : RouteTest() {
         }
 
         val response = client.post {
-            url(slettTelefonnummerPath)
+            url(slettKontaktadressePath)
             contentType(ContentType.Application.Json)
-            setBody(slettRequest)
         }
 
         response.status shouldBe HttpStatusCode.InternalServerError
@@ -264,9 +248,8 @@ class SlettTelefonnummerRouteTest : RouteTest() {
 
         externalService(pdlApiUrl) {
             post("/graphql") {
-                call.respondText(hentTelefonnummerResponse(
-                    landskode = slettRequest.landskode,
-                    nummer = slettRequest.nummer,
+                call.respondText(hentKontaktadresseResponse(
+                    master = "PDL",
                     opplysningsId = "123"
                 ), contentType = ContentType.Application.Json)
             }
@@ -285,9 +268,8 @@ class SlettTelefonnummerRouteTest : RouteTest() {
         }
 
         val response = client.post {
-            url(slettTelefonnummerPath)
+            url(slettKontaktadressePath)
             contentType(ContentType.Application.Json)
-            setBody(slettRequest)
         }
 
         response.status shouldBe HttpStatusCode.OK
@@ -312,9 +294,8 @@ class SlettTelefonnummerRouteTest : RouteTest() {
 
         externalService(pdlApiUrl) {
             post("/graphql") {
-                call.respondText(hentTelefonnummerResponse(
-                    landskode = slettRequest.landskode,
-                    nummer = slettRequest.nummer,
+                call.respondText(hentKontaktadresseResponse(
+                    master = "PDL",
                     opplysningsId = "123"
                 ), contentType = ContentType.Application.Json)
             }
@@ -332,9 +313,8 @@ class SlettTelefonnummerRouteTest : RouteTest() {
         }
 
         val response = client.post {
-            url(slettTelefonnummerPath)
+            url(slettKontaktadressePath)
             contentType(ContentType.Application.Json)
-            setBody(slettRequest)
         }
 
         response.status shouldBe HttpStatusCode.OK
@@ -344,19 +324,17 @@ class SlettTelefonnummerRouteTest : RouteTest() {
         }
     }
 
-    private fun hentTelefonnummerResponse(
-        landskode: String,
-        nummer: String,
+    private fun hentKontaktadresseResponse(
+        master: String,
         opplysningsId: String
     ) = """
 {
     "data": {
         "person": {
-            "telefonnummer": [
+            "kontaktadresse": [
                 {
-                    "landskode": "$landskode",
-                    "nummer": "$nummer",
                     "metadata": {
+                        "master": "$master",
                         "opplysningsId": "$opplysningsId"
                     }
                 }

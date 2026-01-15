@@ -22,6 +22,7 @@ import no.nav.tms.common.logging.TeamLogs
 import no.nav.tms.common.metrics.installTmsMicrometerMetrics
 import no.nav.tms.personopplysninger.api.common.ConsumerException
 import no.nav.tms.personopplysninger.api.common.ConsumerMetrics
+import no.nav.tms.personopplysninger.api.personalia.SlettPersonopplysningException
 import no.nav.tms.token.support.idporten.sidecar.IdPortenTokenPrincipal
 import no.nav.tms.token.support.idporten.sidecar.idPorten
 import no.nav.tms.token.support.idporten.sidecar.user.IdportenUserFactory
@@ -66,12 +67,17 @@ fun Application.mainModule(
                 is ConsumerException -> {
                     log.error { "Kall mot ${cause.externalService} [${cause.endpoint}] feiler med kode [${cause.status}]" }
                     teamLog.error { "Kall mot krr-proxy [${cause.endpoint}] feiler med kode [${cause.status}] og melding: ${cause.responseContent}" }
+                    call.respond(HttpStatusCode.InternalServerError)
+                }
+                is SlettPersonopplysningException -> {
+                    log.error(cause) { "Sletting av personopplysning feilet" }
+                    call.respond(HttpStatusCode.UnprocessableEntity)
                 }
                 else -> {
                     teamLog.warn(cause) { "Kall til ${call.request.uri} feilet: ${cause.message}" }
+                    call.respond(HttpStatusCode.InternalServerError)
                 }
             }
-            call.respond(HttpStatusCode.InternalServerError)
         }
     }
 
