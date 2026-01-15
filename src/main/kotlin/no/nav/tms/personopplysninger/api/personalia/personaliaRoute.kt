@@ -1,7 +1,7 @@
 package no.nav.tms.personopplysninger.api.personalia
 
 import io.ktor.server.request.*
-import io.ktor.server.response.*
+import io.ktor.server.response.respond
 import io.ktor.server.routing.*
 import no.nav.tms.personopplysninger.api.user
 
@@ -20,6 +20,12 @@ fun Route.personalia(personaliaService: HentPersonaliaService, oppdaterPersonali
         val telefonnummer = call.receive<TelefonnummerEndring>()
 
         call.respond(oppdaterPersonaliaService.slettTelefonNummer(call.user, telefonnummer))
+    }
+
+    post("/slettKontaktadresse") {
+        val resp = oppdaterPersonaliaService.slettPdlKontaktadresse(call.user)
+
+        call.respond(resp)
     }
 }
 

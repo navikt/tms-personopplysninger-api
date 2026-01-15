@@ -1,37 +1,48 @@
 package no.nav.tms.personopplysninger.api.personalia.pdl
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.tms.personopplysninger.api.personalia.TelefonnummerEndring
 
 
-data class OppdaterTelefonnummer(
+data class OppdaterPersonopplysning(
     val ident: String,
+    val opplysningstype: Opplysningstype,
     val endringstype: EndringsType,
     val endringsmelding: Endringsmelding,
     val opplysningsId: String? = null
 ) {
-    val opplysningstype: String = "TELEFONNUMMER"
-
     companion object {
-        fun slettTelefonnummerPayload(ident: String, opplysningsId: String): OppdaterTelefonnummer {
-            return OppdaterTelefonnummer(
-                ident = ident,
-                endringstype = EndringsType.OPPHOER,
-                endringsmelding = OpphoerEndringsMelding(),
-                opplysningsId = opplysningsId
-            )
-        }
 
-        fun endreTelefonnummerPayload(ident: String, endringsmelding: TelefonnummerEndring): OppdaterTelefonnummer {
-            return OppdaterTelefonnummer(
+        fun endreTelefonnummerPayload(ident: String, endringsmelding: TelefonnummerEndring): OppdaterPersonopplysning {
+            return OppdaterPersonopplysning(
                 ident = ident,
+                opplysningstype = Opplysningstype.TELEFONNUMMER,
                 endringstype = EndringsType.OPPRETT,
                 endringsmelding = Telefonnummer(
                     landskode = endringsmelding.landskode,
                     nummer = endringsmelding.nummer,
                     prioritet = endringsmelding.prioritet,
                 )
+            )
+        }
+
+        fun slettTelefonnummerPayload(ident: String, opplysningsId: String): OppdaterPersonopplysning {
+            return OppdaterPersonopplysning(
+                ident = ident,
+                opplysningstype = Opplysningstype.TELEFONNUMMER,
+                endringstype = EndringsType.OPPHOER,
+                endringsmelding = OpphoerEndringsMelding(),
+                opplysningsId = opplysningsId
+            )
+        }
+
+        fun slettKontaktadressePayload(ident: String, opplysningsId: String): OppdaterPersonopplysning {
+            return OppdaterPersonopplysning(
+                ident = ident,
+                opplysningstype = Opplysningstype.KONTAKTADRESSE,
+                endringstype = EndringsType.OPPHOER,
+                endringsmelding = OpphoerEndringsMelding(),
+                opplysningsId = opplysningsId
             )
         }
     }
@@ -44,6 +55,10 @@ interface Endringsmelding {
 
 enum class EndringsType {
     OPPHOER, OPPRETT
+}
+
+enum class Opplysningstype {
+    TELEFONNUMMER, KONTAKTADRESSE
 }
 
 data class Telefonnummer(

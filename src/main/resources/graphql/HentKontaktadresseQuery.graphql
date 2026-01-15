@@ -1,0 +1,10 @@
+query HentKontaktadresseQuery($ident: ID!) {
+    person: hentPerson(ident: $ident) {
+        kontaktadresse {
+            metadata {
+                master
+                opplysningsId
+            }
+        }
+    }
+}
