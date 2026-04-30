@@ -61,11 +61,12 @@ class PdlApiConsumer(
         val query = HentKontaktadresseQuery.Variables(ident = ident)
             .let { HentKontaktadresseQuery(it) }
 
-        val rawResponse = sendQuery(query, token)
+        val response = sendQuery(query, token)
+            .let { parseBody<HentKontaktadresseQuery.Result>(it) }
 
         val objectMapper = jacksonObjectMapper()
 
-        teamLog.info { "DEBUG: ${objectMapper.writeValueAsString(rawResponse)}" }
+        teamLog.info { "DEBUG: ${objectMapper.writeValueAsString(response)}" }
     }
 
     private suspend inline fun <reified T : Any> executeQuery(request: GraphQLClientRequest<T>, token: String): T {
