@@ -3,6 +3,7 @@ package no.nav.tms.personopplysninger.api
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import io.ktor.server.request.receive
 import io.ktor.server.routing.*
 import no.nav.tms.personopplysninger.api.common.TokenExchanger
 import no.nav.tms.personopplysninger.api.institusjon.InstitusjonConsumer
@@ -98,6 +99,14 @@ fun main() {
         sporingsloggRoutes(sporingsloggService)
     }
 
+    val debugRoute: Route.() -> Unit = {
+        post("/debug") {
+            val ident = call.receive<Map<String, String>>()["ident"]!!
+
+            pdlApiConsumer.logAdresse(ident)
+        }
+    }
+
     embeddedServer(
         factory = Netty,
         configure = {
@@ -111,7 +120,8 @@ fun main() {
                 userRoutes = userRoutes,
                 httpClient = httpClient,
                 corsAllowedOrigins = environment.corsAllowedOrigins,
-                corsAllowedSchemes = environment.corsAllowedSchemes
+                corsAllowedSchemes = environment.corsAllowedSchemes,
+                debugRoute = debugRoute
             )
         }
     ).start(wait = true)

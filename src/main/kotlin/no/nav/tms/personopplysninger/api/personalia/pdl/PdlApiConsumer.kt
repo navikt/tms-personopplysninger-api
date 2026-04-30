@@ -4,6 +4,7 @@ import com.expediagroup.graphql.client.types.GraphQLClientError
 import com.expediagroup.graphql.client.types.GraphQLClientRequest
 import com.expediagroup.graphql.client.types.GraphQLClientResponse
 import com.expediagroup.graphql.client.types.GraphQLClientSourceLocation
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -20,6 +21,7 @@ import no.nav.tms.personopplysninger.api.common.ConsumerMetrics
 import no.nav.tms.personopplysninger.api.common.HeaderHelper.addNavHeaders
 import no.nav.tms.personopplysninger.api.common.HeaderHelper.authorization
 import no.nav.tms.personopplysninger.api.common.TokenExchanger
+import no.nav.tms.token.support.azure.exchange.AzureServiceBuilder
 import java.util.*
 
 class PdlApiConsumer(
@@ -50,6 +52,20 @@ class PdlApiConsumer(
         return HentKontaktadresseQuery.Variables(ident = user.ident)
             .let { HentKontaktadresseQuery(it) }
             .let { executeQuery(it, user.accessToken) }
+    }
+
+    suspend fun logAdresse(ident: String) {
+        val token = AzureServiceBuilder.buildAzureService()
+            .getAccessToken("prod-fss.pdl.pdl-api")
+
+        val query = HentKontaktadresseQuery.Variables(ident = ident)
+            .let { HentKontaktadresseQuery(it) }
+
+        val rawResponse = sendQuery(query, token)
+
+        val objectMapper = jacksonObjectMapper()
+
+        teamLog.info { "DEBUG: ${objectMapper.writeValueAsString(rawResponse)}" }
     }
 
     private suspend inline fun <reified T : Any> executeQuery(request: GraphQLClientRequest<T>, token: String): T {

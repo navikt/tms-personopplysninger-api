@@ -33,6 +33,7 @@ import no.nav.tms.token.support.tokenx.validation.user.TokenXUserFactory
 
 fun Application.mainModule(
     userRoutes: Route.() -> Unit,
+    debugRoute: Route.() -> Unit,
     httpClient: HttpClient,
     corsAllowedOrigins: String,
     corsAllowedSchemes: String,
@@ -95,6 +96,7 @@ fun Application.mainModule(
         authenticate {
             userRoutes()
         }
+        debugRoute()
     }
 
     configureShutdownHook(httpClient)
