@@ -58,11 +58,11 @@ class PdlApiConsumer(
         val token = AzureServiceBuilder.buildAzureService()
             .getAccessToken("prod-fss.pdl.pdl-api")
 
-        val query = HentKontaktadresseQuery.Variables(ident = ident)
-            .let { HentKontaktadresseQuery(it) }
+        val query = HentPersonQuery.Variables(ident = ident)
+            .let { HentPersonQuery(it) }
 
         val response = sendQuery(query, token)
-            .let { parseBody<HentKontaktadresseQuery.Result>(it) }
+            .let { parseBody<HentPersonQuery.Result>(it) }
 
         val objectMapper = jacksonObjectMapper()
 
