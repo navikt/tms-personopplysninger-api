@@ -14,7 +14,7 @@ import no.nav.tms.personopplysninger.api.common.HeaderHelper
 import no.nav.tms.personopplysninger.api.common.TokenExchanger
 import no.nav.tms.personopplysninger.api.kodeverk.KodeverkConsumer
 import no.nav.tms.personopplysninger.api.routeConfig
-import no.nav.tms.token.support.azure.exchange.AzureService
+import no.nav.tms.token.support.entraid.token.fetcher.EntraIdTokenFetcher
 import org.junit.jupiter.api.Test
 
 class HentKontaktinformasjonRouteTest : RouteTest() {
@@ -30,7 +30,7 @@ class HentKontaktinformasjonRouteTest : RouteTest() {
         coEvery { it.krrProxyToken(any()) } returns krrProxyToken
     }
 
-    private val azureService: AzureService = mockk<AzureService>().also {
+    private val entraIdTokenFetcher: EntraIdTokenFetcher = mockk<EntraIdTokenFetcher>().also {
         coEvery { it.getAccessToken(kodeverkClientId) } returns kodeverkToken
     }
 
@@ -39,7 +39,7 @@ class HentKontaktinformasjonRouteTest : RouteTest() {
             kontaktinformasjonRoutes(
                 KontaktinformasjonService(
                     KontaktinformasjonConsumer(client, krrProxyUrl, tokenExchanger),
-                    KodeverkConsumer(client, azureService, kodeverkUrl, kodeverkClientId)
+                    KodeverkConsumer(client, entraIdTokenFetcher, kodeverkUrl, kodeverkClientId)
                 )
             )
         }

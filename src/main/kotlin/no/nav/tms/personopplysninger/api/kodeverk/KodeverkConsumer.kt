@@ -11,12 +11,12 @@ import no.nav.tms.personopplysninger.api.common.ConsumerException
 import no.nav.tms.personopplysninger.api.common.ConsumerMetrics
 import no.nav.tms.personopplysninger.api.common.HeaderHelper.addNavHeaders
 import no.nav.tms.personopplysninger.api.common.HeaderHelper.authorization
-import no.nav.tms.token.support.azure.exchange.AzureService
+import no.nav.tms.token.support.entraid.token.fetcher.EntraIdTokenFetcher
 import java.time.Duration
 
 class KodeverkConsumer(
     private val client: HttpClient,
-    private val azureService: AzureService,
+    private val entraIdTokenFetcher: EntraIdTokenFetcher,
     private val kodeverkUrl: String,
     private val kodevekClientId: String,
     cacheDuration: Duration = Duration.ofMinutes(45)
@@ -80,7 +80,7 @@ class KodeverkConsumer(
                 parameter(PARAM_SPRAAK, NORSK_BOKMAAL)
                 parameter(PARAM_EKSKLUDER_UGYLDIGE, ekskluderUgyldige)
                 addNavHeaders()
-                authorization(azureService.getAccessToken(kodevekClientId))
+                authorization(entraIdTokenFetcher.getAccessToken(kodevekClientId))
             }
         }
 

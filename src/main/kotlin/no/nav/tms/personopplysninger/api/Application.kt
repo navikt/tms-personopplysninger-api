@@ -27,17 +27,17 @@ import no.nav.tms.personopplysninger.api.sporingslogg.EregServicesConsumer
 import no.nav.tms.personopplysninger.api.sporingslogg.SporingsloggConsumer
 import no.nav.tms.personopplysninger.api.sporingslogg.SporingsloggService
 import no.nav.tms.personopplysninger.api.sporingslogg.sporingsloggRoutes
-import no.nav.tms.token.support.azure.exchange.AzureServiceBuilder
-import no.nav.tms.token.support.tokendings.exchange.TokendingsServiceBuilder
+import no.nav.tms.token.support.entraid.token.fetcher.EntraIdTokenFetcherBuilder
+import no.nav.tms.token.support.user.token.exchange.UserTokenExchangerBuilder
 
 fun main() {
     val environment = Environment()
 
     val httpClient = HttpClientBuilder.build()
 
-    val azureService = AzureServiceBuilder.buildAzureService()
+    val entraIdTokenFetcher = EntraIdTokenFetcherBuilder.build()
     val tokenExchanger = TokenExchanger(
-        tokendingsService = TokendingsServiceBuilder.buildTokendingsService(),
+        userTokenExchanger = UserTokenExchangerBuilder.build(),
         kontoregisterClientId = environment.kontoregisterClientId,
         pdlApiClientId = environment.pdlApiClientId,
         pdlMottakClientId = environment.pdlMottakClientId,
@@ -47,7 +47,7 @@ fun main() {
         sporingsloggClientId = environment.sporingsloggClientId
     )
 
-    val kodeverkConsumer = KodeverkConsumer(httpClient, azureService, environment.kodeverkUrl, environment.kodeverkClientId)
+    val kodeverkConsumer = KodeverkConsumer(httpClient, entraIdTokenFetcher, environment.kodeverkUrl, environment.kodeverkClientId)
 
     val pdlApiConsumer = PdlApiConsumer(httpClient, environment.pdlUrl, environment.pdlBehandlingsnummer, tokenExchanger)
     val pdlMottakConsumer = PdlMottakConsumer(httpClient, environment.pdlMottakUrl, tokenExchanger)

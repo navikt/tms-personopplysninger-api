@@ -2,7 +2,7 @@ package no.nav.tms.personopplysninger.api
 
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngine
-import io.ktor.client.engine.apache.Apache
+import io.ktor.client.engine.apache5.Apache5
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.jackson.*
@@ -37,7 +37,7 @@ data class Environment(
 
 object HttpClientBuilder {
 
-    fun build(httpClientEngine: HttpClientEngine = Apache.create()): HttpClient {
+    fun build(httpClientEngine: HttpClientEngine = Apache5.create()): HttpClient {
         return HttpClient(httpClientEngine) {
             install(ContentNegotiation) {
                 jackson { jsonConfig() }

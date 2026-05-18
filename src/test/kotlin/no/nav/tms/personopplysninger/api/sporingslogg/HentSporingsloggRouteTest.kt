@@ -17,7 +17,7 @@ import no.nav.tms.personopplysninger.api.common.HeaderHelper
 import no.nav.tms.personopplysninger.api.common.TokenExchanger
 import no.nav.tms.personopplysninger.api.kodeverk.KodeverkConsumer
 import no.nav.tms.personopplysninger.api.routeConfig
-import no.nav.tms.token.support.azure.exchange.AzureService
+import no.nav.tms.token.support.entraid.token.fetcher.EntraIdTokenFetcher
 import org.junit.jupiter.api.Test
 
 class HentSporingsloggRouteTest: RouteTest() {
@@ -33,14 +33,14 @@ class HentSporingsloggRouteTest: RouteTest() {
         coEvery { it.sporingsloggToken(any()) } returns sporingsloggToken
     }
 
-    private val azureService = mockk<AzureService>().also {
+    private val entraIdTokenFetcher = mockk<EntraIdTokenFetcher>().also {
         coEvery { it.getAccessToken(kodeverkClientId) } returns kodeverkToken
     }
 
     private val internalRouteConfig: InternalRouteConfig = { client ->
         val sporingsloggConsumer = SporingsloggConsumer(client, sporingsloggUrl, tokenExchanger)
         val eregServicesConsumer = EregServicesConsumer(client, eregServicesUrl)
-        val kodeverkConsumer = KodeverkConsumer(client, azureService, kodeverkUrl, kodeverkClientId)
+        val kodeverkConsumer = KodeverkConsumer(client, entraIdTokenFetcher, kodeverkUrl, kodeverkClientId)
 
         routeConfig {
             sporingsloggRoutes(

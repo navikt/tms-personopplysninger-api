@@ -12,7 +12,7 @@ import no.nav.tms.personopplysninger.api.RouteTest
 import no.nav.tms.personopplysninger.api.InternalRouteConfig
 import no.nav.tms.personopplysninger.api.common.HeaderHelper
 import no.nav.tms.personopplysninger.api.routeConfig
-import no.nav.tms.token.support.azure.exchange.AzureService
+import no.nav.tms.token.support.entraid.token.fetcher.EntraIdTokenFetcher
 import org.junit.jupiter.api.Test
 
 class HentRetningsnumreRouteTest : RouteTest() {
@@ -21,14 +21,14 @@ class HentRetningsnumreRouteTest : RouteTest() {
     private val kodeverkClientId = "cluster.namespace.kodeverk"
     private val kodeverkToken = "<kodeverk-token>"
 
-    private val azureService: AzureService = mockk<AzureService>().also {
+    private val tokenFetcher = mockk<EntraIdTokenFetcher>().also {
         coEvery { it.getAccessToken(kodeverkClientId) } returns kodeverkToken
     }
 
     private val internalRouteConfig: InternalRouteConfig = { client ->
         routeConfig {
             kodeverkRoutes(
-                KodeverkConsumer(client, azureService, kodeverkUrl, kodeverkClientId)
+                KodeverkConsumer(client, tokenFetcher, kodeverkUrl, kodeverkClientId)
             )
         }
     }

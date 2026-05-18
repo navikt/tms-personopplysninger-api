@@ -21,15 +21,10 @@ import io.ktor.server.routing.*
 import no.nav.tms.common.logging.TeamLogs
 import no.nav.tms.common.metrics.installTmsMicrometerMetrics
 import no.nav.tms.personopplysninger.api.common.ConsumerException
-import no.nav.tms.personopplysninger.api.common.ConsumerMetrics
 import no.nav.tms.personopplysninger.api.personalia.SlettPersonopplysningException
-import no.nav.tms.token.support.idporten.sidecar.IdPortenTokenPrincipal
-import no.nav.tms.token.support.idporten.sidecar.idPorten
-import no.nav.tms.token.support.idporten.sidecar.user.IdportenUserFactory
-import no.nav.tms.token.support.tokenx.validation.LevelOfAssurance
-import no.nav.tms.token.support.tokenx.validation.TokenXPrincipal
-import no.nav.tms.token.support.tokenx.validation.tokenX
-import no.nav.tms.token.support.tokenx.validation.user.TokenXUserFactory
+import no.nav.tms.token.support.user.token.verification.UserPrincipal
+import no.nav.tms.token.support.user.token.verification.userToken
+import java.lang.IllegalStateException
 
 fun Application.mainModule(
     userRoutes: Route.() -> Unit,
@@ -38,12 +33,8 @@ fun Application.mainModule(
     corsAllowedSchemes: String,
     authInstaller: Application.() -> Unit = {
         authentication {
-            idPorten {
-                setAsDefault = true
-            }
-            tokenX {
-                setAsDefault = false
-                levelOfAssurance = LevelOfAssurance.HIGH
+            userToken {
+
             }
         }
     }
@@ -124,22 +115,4 @@ fun ObjectMapper.jsonConfig(): ObjectMapper {
     return this
 }
 
-val ApplicationCall.user: UserPrincipal get() {
-
-    return principal<IdPortenTokenPrincipal>()?.let {
-
-        val idPortenUser = IdportenUserFactory.createIdportenUser(this)
-
-        UserPrincipal(idPortenUser.ident, idPortenUser.tokenString)
-    } ?: principal<TokenXPrincipal>()?.let {
-
-        val tokenXUser = TokenXUserFactory.createTokenXUser(this)
-
-        UserPrincipal(tokenXUser.ident, tokenXUser.tokenString)
-    }?: throw IllegalStateException("Fant ingen principal")
-}
-
-class UserPrincipal(
-    val ident: String,
-    val accessToken: String
-)
+val ApplicationCall.user get() = principal<UserPrincipal>() ?: throw IllegalStateException("Fant ikke UserPrincipal i context")
