@@ -4,6 +4,7 @@ import com.github.benmanes.caffeine.cache.Caffeine
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.*
+import io.ktor.http.appendPathSegments
 import io.ktor.http.isSuccess
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -28,43 +29,43 @@ class KodeverkConsumer(
 
     private val metrics = ConsumerMetrics.init { }
 
-    suspend fun hentRetningsnumre(): KodeverkBetydningerResponse {
+    fun hentRetningsnumre(): KodeverkBetydningerResponse {
         return getKodeverk("Retningsnumre")
     }
 
-    suspend fun hentKommuner(): KodeverkBetydningerResponse {
+    fun hentKommuner(): KodeverkBetydningerResponse {
         return getKodeverk("Kommuner", ekskluderUgyldige = false)
     }
 
-    suspend fun hentLandKoder(): KodeverkBetydningerResponse {
+    fun hentLandKoder(): KodeverkBetydningerResponse {
         return getKodeverk("Landkoder", ekskluderUgyldige = false)
     }
 
-    suspend fun hentPostnummer(): KodeverkBetydningerResponse {
+    fun hentPostnummer(): KodeverkBetydningerResponse {
         return getKodeverk("Postnummer")
     }
 
-    suspend fun hentStatsborgerskap(): KodeverkBetydningerResponse {
+    fun hentStatsborgerskap(): KodeverkBetydningerResponse {
         return getKodeverk("StatsborgerskapFreg")
     }
 
-    suspend fun hentDekningMedl(): KodeverkBetydningerResponse {
+    fun hentDekningMedl(): KodeverkBetydningerResponse {
         return getKodeverk("DekningMedl")
     }
 
-    suspend fun hentGrunnlagMedl(): KodeverkBetydningerResponse {
+    fun hentGrunnlagMedl(): KodeverkBetydningerResponse {
         return getKodeverk("GrunnlagMedl")
     }
 
-    suspend fun hentSpraak(): KodeverkBetydningerResponse {
+    fun hentSpraak(): KodeverkBetydningerResponse {
         return getKodeverk("Språk")
     }
 
-    suspend fun hentTema(): KodeverkBetydningerResponse {
+    fun hentTema(): KodeverkBetydningerResponse {
         return getKodeverk("Tema")
     }
 
-    private suspend fun getKodeverk(navn: String, ekskluderUgyldige: Boolean = true): KodeverkBetydningerResponse {
+    private fun getKodeverk(navn: String, ekskluderUgyldige: Boolean = true): KodeverkBetydningerResponse {
         return cache.get(navn to ekskluderUgyldige) {
             runBlocking(Dispatchers.IO) {
                 fetchKodeverk(navn, ekskluderUgyldige)
@@ -75,8 +76,10 @@ class KodeverkConsumer(
     private suspend fun fetchKodeverk(navn: String, ekskluderUgyldige: Boolean): KodeverkBetydningerResponse {
 
         val response = metrics.measureRequest(navn.lowercase()) {
-            client.get {
-                url("$kodeverkUrl/api/v1/kodeverk/$navn/koder/betydninger")
+            client.get("$kodeverkUrl/api/v1/kodeverk") {
+                url { // Ensures correct encoding of non-ascii characters
+                    appendPathSegments(navn, "koder", "betydninger")
+                }
                 parameter(PARAM_SPRAAK, NORSK_BOKMAAL)
                 parameter(PARAM_EKSKLUDER_UGYLDIGE, ekskluderUgyldige)
                 addNavHeaders()
