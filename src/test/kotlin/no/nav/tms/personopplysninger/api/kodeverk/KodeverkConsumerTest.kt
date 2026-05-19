@@ -12,7 +12,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import no.nav.tms.personopplysninger.api.jsonConfig
-import no.nav.tms.token.support.azure.exchange.AzureService
+import no.nav.tms.token.support.entraid.token.fetcher.EntraIdTokenFetcher
 import org.junit.jupiter.api.Test
 import java.time.Duration
 
@@ -21,7 +21,7 @@ class KodeverkConsumerTest {
     private val kodeverkUrl = "http://kodeverk"
     private val kodeverkClientId = "clientId"
 
-    private val azureService = mockk<AzureService>().also {
+    private val tokenFetcher = mockk<EntraIdTokenFetcher>().also {
         coEvery { it.getAccessToken(kodeverkClientId) } returns "token"
     }
 
@@ -39,7 +39,7 @@ class KodeverkConsumerTest {
         }
 
 
-        val consumer = KodeverkConsumer(httpClient, azureService, kodeverkUrl, kodeverkClientId)
+        val consumer = KodeverkConsumer(httpClient, tokenFetcher, kodeverkUrl, kodeverkClientId)
 
 
         consumer.hentPostnummer()
@@ -70,7 +70,7 @@ class KodeverkConsumerTest {
 
 
         val consumer = KodeverkConsumer(
-            httpClient, azureService, kodeverkUrl, kodeverkClientId,
+            httpClient, tokenFetcher, kodeverkUrl, kodeverkClientId,
             cacheDuration = Duration.ofMillis(200)
         )
 

@@ -20,7 +20,7 @@ import no.nav.tms.personopplysninger.api.personalia.HentPersonaliaTestData.Exter
 import no.nav.tms.personopplysninger.api.personalia.norg2.Norg2Consumer
 import no.nav.tms.personopplysninger.api.personalia.pdl.PdlApiConsumer
 import no.nav.tms.personopplysninger.api.routeConfig
-import no.nav.tms.token.support.azure.exchange.AzureService
+import no.nav.tms.token.support.entraid.token.fetcher.EntraIdTokenFetcher
 import org.junit.jupiter.api.Test
 
 class HentPersonaliaRouteTest : RouteTest() {
@@ -40,14 +40,14 @@ class HentPersonaliaRouteTest : RouteTest() {
         coEvery { it.kontoregisterToken(any()) } returns kontoregisterToken
     }
 
-    private val azureService = mockk<AzureService>().also {
+    private val entraIdTokenFetcher = mockk<EntraIdTokenFetcher>().also {
         coEvery { it.getAccessToken(kodeverkClientId) } returns kodeverkToken
     }
 
     private val internalRouteConfig: InternalRouteConfig = { client ->
         val pdlApiConsumer = PdlApiConsumer(client, pdlApiUrl, behandlingsnummer, tokenExchanger)
         val norg2Consumer = Norg2Consumer(client, norg2Url)
-        val kodeverkConsumer = KodeverkConsumer(client, azureService, kodeverkUrl, kodeverkClientId)
+        val kodeverkConsumer = KodeverkConsumer(client, entraIdTokenFetcher, kodeverkUrl, kodeverkClientId)
         val kontoregisterConsumer = KontoregisterConsumer(client, kontoregisterUrl, tokenExchanger)
 
         routeConfig {

@@ -15,11 +15,11 @@ import no.nav.pdl.generated.dto.HentKontaktadresseQuery
 import no.nav.pdl.generated.dto.HentPersonQuery
 import no.nav.pdl.generated.dto.HentTelefonQuery
 import no.nav.tms.common.logging.TeamLogs
-import no.nav.tms.personopplysninger.api.UserPrincipal
 import no.nav.tms.personopplysninger.api.common.ConsumerMetrics
 import no.nav.tms.personopplysninger.api.common.HeaderHelper.addNavHeaders
 import no.nav.tms.personopplysninger.api.common.HeaderHelper.authorization
 import no.nav.tms.personopplysninger.api.common.TokenExchanger
+import no.nav.tms.token.support.user.token.verification.UserPrincipal
 import java.util.*
 
 class PdlApiConsumer(

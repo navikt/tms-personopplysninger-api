@@ -13,7 +13,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import no.nav.tms.personopplysninger.api.common.TokenExchanger
 import no.nav.tms.personopplysninger.api.jsonConfig
-import no.nav.tms.token.support.azure.exchange.AzureService
 import org.junit.jupiter.api.Test
 import java.time.Duration
 

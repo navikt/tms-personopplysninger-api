@@ -1,7 +1,7 @@
 package no.nav.tms.personopplysninger.api.sporingslogg
 
-import no.nav.tms.personopplysninger.api.UserPrincipal
 import no.nav.tms.personopplysninger.api.kodeverk.KodeverkConsumer
+import no.nav.tms.token.support.user.token.verification.UserPrincipal
 import java.time.LocalDateTime
 
 

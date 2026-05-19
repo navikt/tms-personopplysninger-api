@@ -2,7 +2,6 @@ package no.nav.tms.personopplysninger.api.personalia;
 
 import no.nav.pdl.generated.dto.hentpersonquery.GeografiskTilknytning
 import no.nav.pdl.generated.dto.hentpersonquery.Statsborgerskap
-import no.nav.tms.personopplysninger.api.UserPrincipal
 import no.nav.tms.personopplysninger.api.kodeverk.AdresseKodeverk
 import no.nav.tms.personopplysninger.api.kodeverk.KodeverkConsumer
 import no.nav.tms.personopplysninger.api.kodeverk.PersonaliaKodeverk
@@ -14,6 +13,7 @@ import no.nav.tms.personopplysninger.api.personalia.addresse.postnummer
 import no.nav.tms.personopplysninger.api.personalia.norg2.Norg2Consumer
 import no.nav.tms.personopplysninger.api.personalia.norg2.Norg2EnhetKontaktinfo
 import no.nav.tms.personopplysninger.api.personalia.pdl.PdlApiConsumer
+import no.nav.tms.token.support.user.token.verification.UserPrincipal
 import no.nav.pdl.generated.dto.hentpersonquery.Person as PdlPerson
 import java.time.LocalDate
 

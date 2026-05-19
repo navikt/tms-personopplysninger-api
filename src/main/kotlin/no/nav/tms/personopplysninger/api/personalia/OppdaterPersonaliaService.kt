@@ -3,9 +3,9 @@ package no.nav.tms.personopplysninger.api.personalia
 import io.prometheus.metrics.core.metrics.Counter
 import no.nav.pdl.generated.dto.HentKontaktadresseQuery
 import no.nav.pdl.generated.dto.HentTelefonQuery
-import no.nav.tms.personopplysninger.api.UserPrincipal
 import no.nav.tms.personopplysninger.api.personalia.pdl.PdlApiConsumer
 import no.nav.tms.personopplysninger.api.personalia.pdl.PdlMottakConsumer
+import no.nav.tms.token.support.user.token.verification.UserPrincipal
 import java.lang.IllegalArgumentException
 
 class OppdaterPersonaliaService(

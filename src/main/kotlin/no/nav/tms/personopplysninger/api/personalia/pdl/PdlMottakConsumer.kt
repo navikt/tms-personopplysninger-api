@@ -7,7 +7,6 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.coroutines.delay
-import no.nav.tms.personopplysninger.api.UserPrincipal
 import no.nav.tms.personopplysninger.api.common.ConsumerException
 import no.nav.tms.personopplysninger.api.common.ConsumerMetrics
 import no.nav.tms.personopplysninger.api.common.HeaderHelper.addNavHeaders
@@ -18,6 +17,7 @@ import no.nav.tms.personopplysninger.api.personalia.TelefonnummerEndring
 import no.nav.tms.personopplysninger.api.personalia.pdl.OppdaterPersonopplysning.Companion.endreTelefonnummerPayload
 import no.nav.tms.personopplysninger.api.personalia.pdl.OppdaterPersonopplysning.Companion.slettKontaktadressePayload
 import no.nav.tms.personopplysninger.api.personalia.pdl.OppdaterPersonopplysning.Companion.slettTelefonnummerPayload
+import no.nav.tms.token.support.user.token.verification.UserPrincipal
 
 class PdlMottakConsumer(
     private val client: HttpClient,
