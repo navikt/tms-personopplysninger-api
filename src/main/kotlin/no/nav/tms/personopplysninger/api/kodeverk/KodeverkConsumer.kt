@@ -12,6 +12,7 @@ import no.nav.tms.personopplysninger.api.common.ConsumerMetrics
 import no.nav.tms.personopplysninger.api.common.HeaderHelper.addNavHeaders
 import no.nav.tms.personopplysninger.api.common.HeaderHelper.authorization
 import no.nav.tms.token.support.entraid.token.fetcher.EntraIdTokenFetcher
+import java.net.URLEncoder
 import java.time.Duration
 
 class KodeverkConsumer(
@@ -28,43 +29,43 @@ class KodeverkConsumer(
 
     private val metrics = ConsumerMetrics.init { }
 
-    suspend fun hentRetningsnumre(): KodeverkBetydningerResponse {
+    fun hentRetningsnumre(): KodeverkBetydningerResponse {
         return getKodeverk("Retningsnumre")
     }
 
-    suspend fun hentKommuner(): KodeverkBetydningerResponse {
+    fun hentKommuner(): KodeverkBetydningerResponse {
         return getKodeverk("Kommuner", ekskluderUgyldige = false)
     }
 
-    suspend fun hentLandKoder(): KodeverkBetydningerResponse {
+    fun hentLandKoder(): KodeverkBetydningerResponse {
         return getKodeverk("Landkoder", ekskluderUgyldige = false)
     }
 
-    suspend fun hentPostnummer(): KodeverkBetydningerResponse {
+    fun hentPostnummer(): KodeverkBetydningerResponse {
         return getKodeverk("Postnummer")
     }
 
-    suspend fun hentStatsborgerskap(): KodeverkBetydningerResponse {
+    fun hentStatsborgerskap(): KodeverkBetydningerResponse {
         return getKodeverk("StatsborgerskapFreg")
     }
 
-    suspend fun hentDekningMedl(): KodeverkBetydningerResponse {
+    fun hentDekningMedl(): KodeverkBetydningerResponse {
         return getKodeverk("DekningMedl")
     }
 
-    suspend fun hentGrunnlagMedl(): KodeverkBetydningerResponse {
+    fun hentGrunnlagMedl(): KodeverkBetydningerResponse {
         return getKodeverk("GrunnlagMedl")
     }
 
-    suspend fun hentSpraak(): KodeverkBetydningerResponse {
+    fun hentSpraak(): KodeverkBetydningerResponse {
         return getKodeverk("Språk")
     }
 
-    suspend fun hentTema(): KodeverkBetydningerResponse {
+    fun hentTema(): KodeverkBetydningerResponse {
         return getKodeverk("Tema")
     }
 
-    private suspend fun getKodeverk(navn: String, ekskluderUgyldige: Boolean = true): KodeverkBetydningerResponse {
+    private fun getKodeverk(navn: String, ekskluderUgyldige: Boolean = true): KodeverkBetydningerResponse {
         return cache.get(navn to ekskluderUgyldige) {
             runBlocking(Dispatchers.IO) {
                 fetchKodeverk(navn, ekskluderUgyldige)
@@ -76,7 +77,9 @@ class KodeverkConsumer(
 
         val response = metrics.measureRequest(navn.lowercase()) {
             client.get {
-                url("$kodeverkUrl/api/v1/kodeverk/$navn/koder/betydninger")
+                val kode = URLEncoder.encode(navn, Charsets.UTF_8)
+
+                url("$kodeverkUrl/api/v1/kodeverk/$kode/koder/betydninger")
                 parameter(PARAM_SPRAAK, NORSK_BOKMAAL)
                 parameter(PARAM_EKSKLUDER_UGYLDIGE, ekskluderUgyldige)
                 addNavHeaders()

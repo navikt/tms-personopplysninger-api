@@ -57,7 +57,7 @@ fun Application.mainModule(
             when(cause) {
                 is ConsumerException -> {
                     log.error { "Kall mot ${cause.externalService} [${cause.endpoint}] feiler med kode [${cause.status}]" }
-                    teamLog.error { "Kall mot krr-proxy [${cause.endpoint}] feiler med kode [${cause.status}] og melding: ${cause.responseContent}" }
+                    teamLog.error { "Kall mot ${cause.externalService} [${cause.endpoint}] feiler med kode [${cause.status}] og melding: ${cause.responseContent}" }
                     call.respond(HttpStatusCode.InternalServerError)
                 }
                 is SlettPersonopplysningException -> {
