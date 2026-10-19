@@ -33,6 +33,9 @@ spec:
     sidecar:
       enabled: true
   accessPolicy:
+    inbound:
+      rules:
+        - application: personopplysninger
     outbound:
       external:
         - host: pdl-mottak.prod-fss-pub.nais.io
