@@ -1,20 +1,20 @@
 query HentPersonQuery($ident: ID!) {
     person: hentPerson(ident: $ident) {
-        navn {
+        navn(historikk: false) {
             fornavn
             mellomnavn
             etternavn
         }
-        telefonnummer {
+        telefonnummer(historikk: false) {
             landskode
             nummer
             prioritet
         }
-        folkeregisteridentifikator {
+        folkeregisteridentifikator(historikk: false) {
             identifikasjonsnummer
             type
         }
-        statsborgerskap {
+        statsborgerskap(historikk: false) {
             land
             gyldigTilOgMed
         }
@@ -22,13 +22,13 @@ query HentPersonQuery($ident: ID!) {
             foedekommune
             foedeland
         }
-        sivilstand {
+        sivilstand(historikk: false) {
             type
         }
-        kjoenn {
+        kjoenn(historikk: false) {
             kjoenn
         }
-        bostedsadresse {
+        bostedsadresse(historikk: false) {
             angittFlyttedato
             coAdressenavn
             vegadresse {
@@ -44,7 +44,7 @@ query HentPersonQuery($ident: ID!) {
                 ...ukjentBostedFields
             }
         }
-        deltBosted {
+        deltBosted(historikk: false) {
             coAdressenavn
             vegadresse {
                 ...vegadresseFields
@@ -59,7 +59,7 @@ query HentPersonQuery($ident: ID!) {
                 ...ukjentBostedFields
             }
         }
-        kontaktadresse {
+        kontaktadresse(historikk: false) {
             gyldigTilOgMed
             coAdressenavn
             postboksadresse {
@@ -81,7 +81,7 @@ query HentPersonQuery($ident: ID!) {
                 master
             }
         }
-        oppholdsadresse {
+        oppholdsadresse(historikk: false) {
             gyldigTilOgMed
             coAdressenavn
             utenlandskAdresse {

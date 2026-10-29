@@ -1,6 +1,6 @@
 query HentTelefonQuery($ident: ID!) {
     person: hentPerson(ident: $ident) {
-        telefonnummer {
+        telefonnummer(historikk: false) {
             landskode
             nummer
             metadata {

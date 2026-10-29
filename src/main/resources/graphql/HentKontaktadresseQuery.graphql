@@ -1,6 +1,6 @@
 query HentKontaktadresseQuery($ident: ID!) {
     person: hentPerson(ident: $ident) {
-        kontaktadresse {
+        kontaktadresse(historikk: false) {
             metadata {
                 master
                 opplysningsId

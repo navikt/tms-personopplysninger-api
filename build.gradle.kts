@@ -1,14 +1,12 @@
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 
 plugins {
-    // Apply the Kotlin JVM plugin to add support for Kotlin on the JVM.
-    kotlin("jvm").version(Kotlin.version)
+    kotlin("jvm").version(libs.versions.kotlin)
 
-    id(GraphQL.pluginId) version GraphQL.version
+    alias(libs.plugins.graphql)
 
-    id(TmsJarBundling.plugin)
+    alias(libs.plugins.tms.jarBundling)
 
-    // Apply the application plugin to add support for building a CLI application.
     application
 }
 
@@ -28,49 +26,31 @@ repositories {
 }
 
 dependencies {
-    implementation(Caffeine.caffeine)
-    implementation(GraphQL.kotlinClient)
-    implementation(GraphQL.kotlinKtorClient)
-    implementation(JacksonDatatype.datatypeJsr310)
-    implementation(JacksonDatatype.moduleKotlin)
-    implementation(Kafka.clients)
-    implementation(KotliQuery.kotliquery)
-    implementation(KotlinLogging.logging)
-    implementation(Ktor.Server.contentNegotiation)
-    implementation(Ktor.Server.core)
-    implementation(Ktor.Server.cors)
-    implementation(Ktor.Server.defaultHeaders)
-    implementation(Ktor.Server.netty)
-    implementation(Ktor.Server.htmlDsl)
-    implementation(Ktor.Server.statusPages)
-    implementation(Ktor.Server.auth)
-    implementation(Ktor.Client.contentNegotiation)
-    implementation(Ktor.Client.apache5)
-    implementation(Ktor.Serialization.jackson)
-    implementation(Logstash.logbackEncoder)
-    implementation(Postgresql.postgresql)
-    implementation(TmsKtorTokenSupport.entraIdTokenFetcher)
-    implementation(TmsKtorTokenSupport.userTokenVerification)
-    implementation(TmsKtorTokenSupport.userTokenExchange)
-    implementation(TmsCommonLib.kubernetes)
-    implementation(TmsCommonLib.metrics)
-    implementation(TmsCommonLib.observability)
-    implementation(TmsCommonLib.teamLogger)
-    implementation(TmsCommonLib.utils)
-    implementation(TmsKafkaTools.kafkaApplication)
-    implementation(Prometheus.metricsCore)
-    implementation("io.ktor:ktor-client-android:3.1.2")
+    implementation(libs.bundles.ktorClient)
+    implementation(libs.bundles.ktorServer)
+    implementation(libs.bundles.jackson)
+    implementation(libs.bundles.logback)
+    implementation(libs.bundles.graphql)
 
-    testImplementation(JunitPlatform.launcher)
-    testImplementation(JunitJupiter.api)
-    testImplementation(JunitJupiter.engine)
-    testImplementation(Mockk.mockk)
-    testImplementation(TestContainers.postgresql)
-    testImplementation(Kotest.runnerJunit5)
-    testImplementation(Kotest.assertionsCore)
-    testImplementation(Ktor.Test.serverTestHost)
-    testImplementation(Ktor.Test.clientMock)
-    testImplementation(TmsKtorTokenSupport.userTokenVerificationMock)
+    implementation(libs.caffeine)
+    implementation(libs.kotlinLogging)
+    implementation(libs.ktor.server.cors)
+    implementation(libs.ktor.server.defaultHeaders)
+    implementation(libs.ktor.serialization.jackson)
+    implementation(libs.tms.ktorTokenSupport.entraId.fetcher)
+    implementation(libs.tms.ktorTokenSupport.userToken.verification)
+    implementation(libs.tms.ktorTokenSupport.userToken.exchange)
+    implementation(libs.tms.commonLib.metrics)
+    implementation(libs.tms.commonLib.teamLogger)
+    implementation(libs.tms.commonLib.utils)
+    implementation(libs.prometheus)
+
+    testImplementation(libs.bundles.junit)
+    testImplementation(libs.bundles.kotest)
+    testImplementation(libs.mockk)
+    testImplementation(libs.ktor.test.clientMock)
+    testImplementation(libs.ktor.test.server)
+    testImplementation(libs.tms.ktorTokenSupport.userToken.verificationMock)
 }
 
 application {
