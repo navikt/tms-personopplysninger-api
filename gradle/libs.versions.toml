@@ -1,5 +1,5 @@
 [versions]
-jacksonDatatype = "2.22.2"
+jacksonDatatype = "2.22.4"
 junitJupiter = "6.1.3"
 kotest = "6.2.6"
 kotlin = "2.4.21"
@@ -9,7 +9,7 @@ testContainer = "2.0.5"
 tmsCommonLib = "5.3.5"
 tmsKtorSupport = "6.0.3"
 tmsJarBundling = "0.1.0"
-caffeine = "3.2.3"
+caffeine = "3.3.1"
 graphql = "11.0.0"
 
 [libraries]
@@ -50,10 +50,10 @@ ktor-serialization-jackson = { group = "io.ktor", name = "ktor-serialization-jac
 ktor-test-clientMock = { group = "io.ktor", name = "ktor-client-mock", version.ref = "ktor" }
 ktor-test-server = { group = "io.ktor", name = "ktor-server-test-host", version.ref = "ktor" }
 
-logback-classic = { group = "ch.qos.logback", name = "logback-classic", version = "1.6.5" }
+logback-classic = { group = "ch.qos.logback", name = "logback-classic", version = "1.6.6" }
 logback-encoder = { group = "net.logstash.logback", name = "logstash-logback-encoder", version = "9.0" }
 
-micrometer-registry-prometheus = { group = "io.micrometer", name = "micrometer-registry-prometheus", version = "1.17.1" }
+micrometer-registry-prometheus = { group = "io.micrometer", name = "micrometer-registry-prometheus", version = "1.17.2" }
 
 mockk = { group = "io.mockk", name = "mockk", version = "1.14.11" }
 
