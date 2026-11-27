@@ -34,6 +34,7 @@ dependencies {
 
     implementation(libs.caffeine)
     implementation(libs.kotlinLogging)
+    implementation(libs.kotlinx.coroutines)
     implementation(libs.ktor.server.cors)
     implementation(libs.ktor.server.defaultHeaders)
     implementation(libs.ktor.serialization.jackson)
