@@ -6,8 +6,9 @@ import io.ktor.client.call.body
 import io.ktor.client.request.*
 import io.ktor.http.appendPathSegments
 import io.ktor.http.isSuccess
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.future.await
+import kotlinx.coroutines.future.future
 import no.nav.tms.personopplysninger.api.common.ConsumerException
 import no.nav.tms.personopplysninger.api.common.ConsumerMetrics
 import no.nav.tms.personopplysninger.api.common.HeaderHelper.addNavHeaders
@@ -25,52 +26,56 @@ class KodeverkConsumer(
     private val cache = Caffeine.newBuilder()
         .maximumSize(20)
         .expireAfterWrite(cacheDuration)
-        .build<Pair<String, Boolean>, KodeverkBetydningerResponse>()
+        .buildAsync<Pair<String, Boolean>, KodeverkBetydningerResponse>()
 
     private val metrics = ConsumerMetrics.init { }
 
-    fun hentRetningsnumre(): KodeverkBetydningerResponse {
+    suspend fun hentRetningsnumre(): KodeverkBetydningerResponse {
         return getKodeverk("Retningsnumre")
     }
 
-    fun hentKommuner(): KodeverkBetydningerResponse {
+    suspend fun hentKommuner(): KodeverkBetydningerResponse {
         return getKodeverk("Kommuner", ekskluderUgyldige = false)
     }
 
-    fun hentLandKoder(): KodeverkBetydningerResponse {
+    suspend fun hentLandKoder(): KodeverkBetydningerResponse {
         return getKodeverk("Landkoder", ekskluderUgyldige = false)
     }
 
-    fun hentPostnummer(): KodeverkBetydningerResponse {
+    suspend fun hentPostnummer(): KodeverkBetydningerResponse {
         return getKodeverk("Postnummer")
     }
 
-    fun hentStatsborgerskap(): KodeverkBetydningerResponse {
+    suspend fun hentStatsborgerskap(): KodeverkBetydningerResponse {
         return getKodeverk("StatsborgerskapFreg")
     }
 
-    fun hentDekningMedl(): KodeverkBetydningerResponse {
+    suspend fun hentDekningMedl(): KodeverkBetydningerResponse {
         return getKodeverk("DekningMedl")
     }
 
-    fun hentGrunnlagMedl(): KodeverkBetydningerResponse {
+    suspend fun hentGrunnlagMedl(): KodeverkBetydningerResponse {
         return getKodeverk("GrunnlagMedl")
     }
 
-    fun hentSpraak(): KodeverkBetydningerResponse {
+    suspend fun hentSpraak(): KodeverkBetydningerResponse {
         return getKodeverk("Språk")
     }
 
-    fun hentTema(): KodeverkBetydningerResponse {
+    suspend fun hentTema(): KodeverkBetydningerResponse {
         return getKodeverk("Tema")
     }
 
-    private fun getKodeverk(navn: String, ekskluderUgyldige: Boolean = true): KodeverkBetydningerResponse {
-        return cache.get(navn to ekskluderUgyldige) {
-            runBlocking(Dispatchers.IO) {
+    private suspend fun getKodeverk(
+        navn: String,
+        ekskluderUgyldige: Boolean = true
+    ): KodeverkBetydningerResponse = coroutineScope {
+
+        cache.get(navn to ekskluderUgyldige) { _, _ ->
+            future {
                 fetchKodeverk(navn, ekskluderUgyldige)
             }
-        }
+        }.await()
     }
 
     private suspend fun fetchKodeverk(navn: String, ekskluderUgyldige: Boolean): KodeverkBetydningerResponse {
